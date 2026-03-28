@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Brand Ultra Clean</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  overflow-x: hidden;
+}
+
+.hero {
+  position: absolute;
+  z-index: 10;
+  top: 40%;
+  left: 10%;
+}
+
+h1 {
+  font-size: 60px;
+  margin: 0;
+}
+
+p {
+  opacity: 0.6;
+}
+
+section {
+  height: 100vh;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+</style>
+
+</head>
+<body>
+
+<div class="hero">
+  <h1>MA MARQUE</h1>
+  <p>Expérience digitale premium</p>
+</div>
+
+<section></section>
+<section></section>
+
+<canvas id="canvas"></canvas>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Loader GLB -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script>
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.getElementById("canvas"),
+  alpha: true,
+  antialias: true
+});
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+camera.position.z = 3;
+
+// lumière
+const light = new THREE.PointLight(0xffffff, 2);
+light.position.set(5, 5, 5);
+scene.add(light);
+
+// loader modèle 3D
+const loader = new THREE.GLTFLoader();
+
+let model;
+
+loader.load(
+  "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
+  function (gltf) {
+    model = gltf.scene;
+    model.scale.set(2, 2, 2);
+    scene.add(model);
+  }
+);
+
+// animation
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (model) {
+    model.rotation.y += 0.005;
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// scroll animation
+window.addEventListener("scroll", () => {
+  if (!model) return;
+
+  const scrollY = window.scrollY;
+
+  gsap.to(model.rotation, {
+    x: scrollY * 0.002,
+    y: scrollY * 0.002
+  });
+});
+
+// resize
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+</body>
+</html>
