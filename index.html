@@ -1,862 +1,341 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MAISON NOMADE — Luxury Riads & Desert Experiences in Morocco">
   <title>MAISON NOMADE — Luxury Travel & Riad Experience</title>
-
-  <!-- ── Fonts ─────────────────────────────────────────────── -->
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
-
-  <!-- ── GSAP (as globals before module) ───────────────────── -->
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
   <style>
-    /* =====================================================
-       ❶  DESIGN TOKENS
-    ===================================================== */
+    /* ══════════════════════════════════════
+       DESIGN TOKENS
+    ══════════════════════════════════════ */
     :root {
-      --ink:          #050403;
-      --ink-2:        #0E0C09;
-      --ink-3:        #181410;
-      --gold:         #BFA06A;
-      --gold-lt:      #D4B87A;
-      --gold-dim:     rgba(191,160,106,.18);
-      --cream:        #F2EDE4;
-      --cream-50:     rgba(242,237,228,.55);
-      --cream-30:     rgba(242,237,228,.30);
-      --ff-display:   'Playfair Display', Georgia, serif;
-      --ff-body:      'DM Sans', system-ui, sans-serif;
-      --ff-accent:    'Cormorant Garamond', Georgia, serif;
-      --ease-lux:     cubic-bezier(.22,1,.36,1);
-      --ease-smooth:  cubic-bezier(.4,0,.2,1);
-      --dur:          .7s;
-    }
-
-    /* =====================================================
-       ❷  RESET & BASE
-    ===================================================== */
-    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
-
-    html {
-      font-size: 16px;
-      scroll-behavior: smooth;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    body {
-      background: var(--ink);
-      color: var(--cream);
-      font-family: var(--ff-body);
-      overflow-x: hidden;
-      cursor: none;
-    }
-
-    img { display:block; max-width:100%; }
-
-    a { text-decoration:none; color:inherit; }
-
-    /* ── scrollbar ── */
-    ::-webkit-scrollbar { width:2px; }
-    ::-webkit-scrollbar-track { background:var(--ink); }
-    ::-webkit-scrollbar-thumb { background:var(--gold); }
-
-    /* =====================================================
-       ❸  CUSTOM CURSOR
-    ===================================================== */
-    #cur-dot {
-      position:fixed; width:8px; height:8px; border-radius:50%;
-      background:var(--gold); pointer-events:none; z-index:9999;
-      transform:translate(-50%,-50%);
-      transition:width .25s, height .25s, opacity .25s;
-    }
-
-    #cur-ring {
-      position:fixed; width:38px; height:38px;
-      border:1px solid rgba(191,160,106,.45); border-radius:50%;
-      pointer-events:none; z-index:9998;
-      transform:translate(-50%,-50%);
-      transition:width .35s var(--ease-lux), height .35s var(--ease-lux),
-                 border-color .3s, opacity .3s;
-    }
-
-    body.cur-hover #cur-ring {
-      width:56px; height:56px;
-      border-color:var(--gold);
-    }
-
-    body.cur-hover #cur-dot { width:4px; height:4px; }
-
-    /* =====================================================
-       ❹  LOADING SCREEN
-    ===================================================== */
-    #loader {
-      position:fixed; inset:0; z-index:10000;
-      background:var(--ink);
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      gap:2rem;
-    }
-
-    .ldr-brand {
-      font-family:var(--ff-display);
-      font-size:2.4rem; font-weight:400;
-      letter-spacing:.55em;
-      color:var(--gold);
-      opacity:0;
-      animation: ldFadeUp .9s var(--ease-lux) .2s forwards;
-    }
-
-    .ldr-track {
-      width:180px; height:1px;
-      background:rgba(191,160,106,.15); overflow:hidden;
-    }
-
-    .ldr-fill {
-      height:100%; width:0%;
-      background:var(--gold);
-      transition:width 2.4s var(--ease-lux);
-    }
-
-    .ldr-caption {
-      font-family:var(--ff-body); font-size:.6rem;
-      letter-spacing:.35em; text-transform:uppercase;
-      color:var(--gold); opacity:.4;
-      animation: ldFadeUp .9s var(--ease-lux) .5s both;
-    }
-
-    @keyframes ldFadeUp {
-      from { opacity:0; transform:translateY(12px); }
-      to   { opacity:1; transform:none; }
-    }
-
-    /* =====================================================
-       ❺  NAVIGATION
-    ===================================================== */
-    #nav {
-      position:fixed; top:0; left:0; right:0; z-index:500;
-      padding:2.2rem 5rem;
-      display:flex; align-items:center; justify-content:space-between;
-      transition:padding .5s var(--ease-smooth),
-                 background .5s, backdrop-filter .5s, border-color .5s;
-      border-bottom:1px solid transparent;
-    }
-
-    #nav.stuck {
-      padding:1.2rem 5rem;
-      background:rgba(5,4,3,.82);
-      backdrop-filter:blur(24px);
-      border-bottom-color:var(--gold-dim);
-    }
-
-    .nav-logo {
-      font-family:var(--ff-display);
-      font-size:1.1rem; font-weight:500;
-      letter-spacing:.35em; text-transform:uppercase;
-      color:var(--gold);
-    }
-
-    .nav-links {
-      list-style:none;
-      display:flex; gap:3rem;
-    }
-
-    .nav-links a {
-      font-family:var(--ff-body);
-      font-size:.67rem; letter-spacing:.22em; text-transform:uppercase;
-      color:var(--cream-50);
-      position:relative;
-      transition:color .3s;
-    }
-
-    .nav-links a::after {
-      content:''; position:absolute; bottom:-3px; left:0;
-      width:0; height:1px; background:var(--gold);
-      transition:width .4s var(--ease-lux);
-    }
-
-    .nav-links a:hover { color:var(--gold); }
-    .nav-links a:hover::after { width:100%; }
-
-    .nav-cta {
-      font-family:var(--ff-body); font-size:.67rem;
-      letter-spacing:.22em; text-transform:uppercase;
-      color:var(--ink); background:var(--gold);
-      padding:.75rem 2rem;
-      transition:background .35s, transform .35s var(--ease-lux);
-    }
-
-    .nav-cta:hover { background:var(--gold-lt); transform:translateY(-2px); }
-
-    /* =====================================================
-       ❻  HERO
-    ===================================================== */
-    #hero {
-      position:relative; height:100svh; min-height:620px;
-      overflow:hidden;
-      display:flex; align-items:center;
-    }
-
-    /* Three.js canvas fills the right half */
-    #c3d {
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      pointer-events:none;
-    }
-
-    .hero-content {
-      position:relative; z-index:2;
-      padding:0 5rem;
-      max-width:680px;
-    }
-
-    .hero-eyebrow {
-      font-family:var(--ff-body); font-size:.62rem;
-      letter-spacing:.5em; text-transform:uppercase;
-      color:var(--gold); margin-bottom:2.2rem;
-      display:flex; align-items:center; gap:1rem;
-      opacity:0; transform:translateY(18px);
-    }
-
-    .hero-eyebrow::before {
-      content:''; width:28px; height:1px; background:var(--gold); flex-shrink:0;
-    }
-
-    .hero-h1 {
-      font-family:var(--ff-display);
-      font-size:clamp(3.5rem,7.5vw,7.5rem);
-      font-weight:400; line-height:1.01;
-      letter-spacing:-.02em;
-      overflow:hidden;
-      margin-bottom:2.4rem;
-    }
-
-    .h1-line {
-      display:block;
-      opacity:0; transform:translateY(105%);
-    }
-
-    .h1-line em {
-      font-style:italic;
-      color:var(--gold);
-    }
-
-    .hero-body {
-      font-family:var(--ff-body); font-size:.93rem;
-      font-weight:300; line-height:1.9;
-      color:var(--cream-50); max-width:380px;
-      margin-bottom:3rem;
-      opacity:0; transform:translateY(18px);
-    }
-
-    .hero-btns {
-      display:flex; gap:2rem; align-items:center;
-      opacity:0; transform:translateY(18px);
-    }
-
-    .btn-fill {
-      font-family:var(--ff-body); font-size:.67rem;
-      letter-spacing:.25em; text-transform:uppercase;
-      color:var(--ink); background:var(--gold);
-      padding:1.15rem 2.8rem;
-      display:inline-block; position:relative; overflow:hidden;
-      transition:transform .4s var(--ease-lux);
-    }
-
-    .btn-fill::before {
-      content:''; position:absolute; inset:0;
-      background:var(--gold-lt);
-      transform:translateX(-100%);
-      transition:transform .45s var(--ease-lux);
-    }
-
-    .btn-fill:hover { transform:translateY(-3px); }
-    .btn-fill:hover::before { transform:none; }
-    .btn-fill span { position:relative; z-index:1; }
-
-    .btn-ghost {
-      font-family:var(--ff-body); font-size:.67rem;
-      letter-spacing:.22em; text-transform:uppercase;
-      color:var(--cream-50);
-      display:flex; align-items:center; gap:.7rem;
-      transition:color .3s, gap .3s var(--ease-lux);
-    }
-
-    .btn-ghost:hover { color:var(--gold); gap:1.1rem; }
-
-    .btn-ghost svg { transition:transform .3s var(--ease-lux); }
-    .btn-ghost:hover svg { transform:translateX(4px); }
-
-    /* scroll hint */
-    .hero-scroll {
-      position:absolute; bottom:2.8rem; left:5rem; z-index:2;
-      display:flex; flex-direction:column; align-items:center; gap:.6rem;
-      opacity:0;
-    }
-
-    .hs-line {
-      width:1px; height:56px;
-      background:linear-gradient(to bottom, var(--gold), transparent);
-      animation:scr 2s ease-in-out infinite;
-    }
-
-    .hs-text {
-      font-family:var(--ff-body); font-size:.56rem;
-      letter-spacing:.35em; text-transform:uppercase;
-      color:var(--gold); writing-mode:vertical-rl;
-    }
-
-    @keyframes scr {
-      0%   { transform:scaleY(0); transform-origin:top; opacity:0; }
-      30%  { opacity:1; }
-      60%  { transform:scaleY(1); transform-origin:top; }
-      61%  { transform-origin:bottom; }
-      100% { transform:scaleY(0); transform-origin:bottom; opacity:0; }
-    }
-
-    /* =====================================================
-       ❼  MARQUEE BAND
-    ===================================================== */
-    .marquee-wrap {
-      overflow:hidden; padding:1.4rem 0;
-      background:var(--gold);
-      border-top:1px solid rgba(0,0,0,.08);
-    }
-
-    .marquee-inner {
-      display:flex; gap:2.5rem; white-space:nowrap;
-      animation:mq 28s linear infinite;
-    }
-
-    .mq-item {
-      font-family:var(--ff-accent);
-      font-size:.95rem; font-style:italic;
-      color:var(--ink); flex-shrink:0; opacity:.85;
-    }
-
-    .mq-sep {
-      flex-shrink:0; color:rgba(5,4,3,.35);
-      font-size:.7rem; align-self:center;
-    }
-
-    @keyframes mq {
-      from { transform:translateX(0); }
-      to   { transform:translateX(-50%); }
-    }
-
-    /* =====================================================
-       ❽  SECTION PRIMITIVES
-    ===================================================== */
-    section { padding:11rem 5rem; }
-
-    .sec-label {
-      font-family:var(--ff-body); font-size:.6rem;
-      letter-spacing:.5em; text-transform:uppercase;
-      color:var(--gold); margin-bottom:2rem;
-      display:flex; align-items:center; gap:1rem;
-    }
-
-    .sec-label::before {
-      content:''; width:26px; height:1px; background:var(--gold); flex-shrink:0;
-    }
-
-    .sec-title {
-      font-family:var(--ff-display);
-      font-size:clamp(2.4rem,4.5vw,5rem);
-      font-weight:400; line-height:1.08;
-    }
-
-    .sec-title em { font-style:italic; color:var(--gold); }
-
-    /* reveal helpers — GSAP animates these */
-    .rv { opacity:0; }
-    .rv-up  { transform:translateY(44px); }
-    .rv-lft { transform:translateX(-44px); }
-    .rv-rgt { transform:translateX(44px); }
-
-    /* =====================================================
-       ❾  ABOUT
-    ===================================================== */
-    #about {
-      background:var(--ink-2);
-      display:grid; grid-template-columns:1fr 1fr;
-      gap:9rem; align-items:center;
-    }
-
-    .about-visual {
-      position:relative; aspect-ratio:3/4; overflow:hidden;
-    }
-
-    .about-img {
-      width:100%; height:100%; object-fit:cover;
-      filter:brightness(.75) saturate(1.1);
-      transition:transform 7s var(--ease-smooth);
-    }
-
-    .about-visual:hover .about-img { transform:scale(1.07); }
-
-    .about-gloss {
-      position:absolute; inset:0;
-      background:linear-gradient(135deg, rgba(191,160,106,.18) 0%, transparent 55%),
-                 linear-gradient(to top, rgba(5,4,3,.7) 0%, transparent 50%);
-    }
-
-    .about-index {
-      position:absolute; bottom:-2.5rem; right:-2rem;
-      font-family:var(--ff-display); font-size:9rem; font-weight:400;
-      color:rgba(191,160,106,.07); line-height:1; pointer-events:none;
-      user-select:none;
-    }
-
-    .about-copy {
-      font-family:var(--ff-body); font-size:.92rem;
-      font-weight:300; line-height:2.05;
-      color:var(--cream-50); margin:2rem 0 3.5rem;
-    }
-
-    .about-stats {
-      display:grid; grid-template-columns:repeat(3,1fr);
-      gap:2rem; padding-top:2.5rem;
-      border-top:1px solid var(--gold-dim);
-    }
-
-    .stat-num {
-      font-family:var(--ff-display);
-      font-size:2.6rem; font-weight:400;
-      color:var(--gold); line-height:1;
-    }
-
-    .stat-lbl {
-      font-family:var(--ff-body); font-size:.62rem;
-      letter-spacing:.18em; text-transform:uppercase;
-      color:var(--cream-30); margin-top:.4rem;
-    }
-
-    /* =====================================================
-       ❿  EXPERIENCES
-    ===================================================== */
-    #experiences { background:var(--ink-3); }
-
-    .exp-head {
-      display:flex; justify-content:space-between;
-      align-items:flex-end; margin-bottom:5rem;
-    }
-
-    .exp-grid {
-      display:grid; grid-template-columns:repeat(3,1fr);
-      gap:3px;
-    }
-
-    .exp-card {
-      position:relative; aspect-ratio:2/3; overflow:hidden;
-      cursor:pointer;
-    }
-
-    .exp-img {
-      width:100%; height:100%; object-fit:cover;
-      filter:brightness(.6) saturate(1.2);
-      transition:transform .9s var(--ease-lux), filter .9s;
-    }
-
-    .exp-card:hover .exp-img {
-      transform:scale(1.09); filter:brightness(.45) saturate(1.4);
-    }
-
-    .exp-veil {
-      position:absolute; inset:0;
-      background:linear-gradient(to top, rgba(5,4,3,.95) 0%,
-                 rgba(5,4,3,.4) 45%, transparent 70%);
-    }
-
-    .exp-info {
-      position:absolute; bottom:0; left:0; right:0;
-      padding:2.5rem;
-      transform:translateY(12px);
-      transition:transform .55s var(--ease-lux);
-    }
-
-    .exp-card:hover .exp-info { transform:none; }
-
-    .exp-num {
-      font-family:var(--ff-body); font-size:.58rem;
-      letter-spacing:.4em; color:var(--gold); margin-bottom:.5rem;
-    }
-
-    .exp-title {
-      font-family:var(--ff-display); font-size:1.9rem;
-      font-weight:400; margin-bottom:1rem;
-    }
-
-    .exp-desc {
-      font-family:var(--ff-body); font-size:.8rem;
-      font-weight:300; line-height:1.75;
-      color:var(--cream-50);
-      max-height:0; overflow:hidden; opacity:0;
-      transition:max-height .6s var(--ease-lux), opacity .5s;
-    }
-
-    .exp-card:hover .exp-desc { max-height:90px; opacity:1; }
-
-    .exp-link {
-      display:inline-flex; align-items:center; gap:.5rem;
-      font-family:var(--ff-body); font-size:.6rem;
-      letter-spacing:.25em; text-transform:uppercase;
-      color:var(--gold); margin-top:1.1rem;
-      opacity:0; transition:opacity .5s;
-    }
-
-    .exp-card:hover .exp-link { opacity:1; }
-
-    /* =====================================================
-       ⓫  ROOMS
-    ===================================================== */
-    #rooms { background:var(--ink); }
-
-    .rooms-head { text-align:center; margin-bottom:6rem; }
-
-    .rooms-grid {
-      display:grid; grid-template-columns:1fr 1fr;
-      gap:3.5rem;
-    }
-
-    .room-card { position:relative; cursor:pointer; }
-
-    .room-img-wrap {
-      aspect-ratio:16/10; overflow:hidden; margin-bottom:1.6rem;
-      position:relative;
-    }
-
-    .room-img {
-      width:100%; height:100%; object-fit:cover;
-      filter:brightness(.78) saturate(1.1);
-      transition:transform .85s var(--ease-lux);
-    }
-
-    .room-card:hover .room-img { transform:scale(1.06); }
-
-    .room-badge {
-      position:absolute; top:1.4rem; right:1.4rem;
-      background:var(--gold); color:var(--ink);
-      font-family:var(--ff-body); font-size:.58rem;
-      letter-spacing:.2em; text-transform:uppercase;
-      padding:.35rem .85rem;
-    }
-
-    .room-name {
-      font-family:var(--ff-display); font-size:1.55rem;
-      font-weight:400; margin-bottom:.6rem;
-    }
-
-    .room-specs {
-      display:flex; gap:1.8rem; flex-wrap:wrap; margin-bottom:1.2rem;
-    }
-
-    .room-spec {
-      font-family:var(--ff-body); font-size:.7rem;
-      font-weight:300; color:var(--cream-50);
-      display:flex; align-items:center; gap:.35rem;
-    }
-
-    .room-footer {
-      display:flex; align-items:center; justify-content:space-between;
-      padding-top:1.2rem; border-top:1px solid var(--gold-dim);
-    }
-
-    .room-price { font-family:var(--ff-display); font-size:1.65rem; color:var(--gold); }
-    .room-per   { font-family:var(--ff-body); font-size:.63rem; color:var(--cream-30); }
-
-    .btn-sm {
-      font-family:var(--ff-body); font-size:.62rem;
-      letter-spacing:.2em; text-transform:uppercase;
-      color:var(--ink); background:var(--gold);
-      padding:.7rem 1.5rem;
-      transition:background .3s, transform .3s var(--ease-lux);
-    }
-    .btn-sm:hover { background:var(--gold-lt); transform:translateY(-2px); }
-
-    /* =====================================================
-       ⓬  GALLERY
-    ===================================================== */
-    #gallery { background:var(--ink-2); padding:11rem 0; }
-
-    .gallery-head { padding:0 5rem; margin-bottom:4rem; }
-
-    .gal-grid {
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      grid-template-rows:auto;
-      gap:3px;
-    }
-
-    .gal-item {
-      overflow:hidden; position:relative; min-height:240px;
-      cursor:pointer;
-    }
-
-    .gal-item:nth-child(1) { grid-column:span 2; grid-row:span 2; }
-    .gal-item:nth-child(5) { grid-column:span 2; }
-
-    .gal-img {
-      width:100%; height:100%; object-fit:cover;
-      filter:brightness(.72) saturate(1.1);
-      transition:transform .85s var(--ease-lux), filter .85s;
-    }
-
-    .gal-item:hover .gal-img {
-      transform:scale(1.07); filter:brightness(.55) saturate(1.3);
-    }
-
-    .gal-overlay {
-      position:absolute; inset:0;
-      background:rgba(191,160,106,.12);
-      opacity:0; transition:opacity .4s;
-      display:flex; align-items:center; justify-content:center;
-    }
-
-    .gal-item:hover .gal-overlay { opacity:1; }
-
-    .gal-plus {
-      font-family:var(--ff-display); font-size:2.5rem;
-      color:#fff; opacity:.7;
-    }
-
-    /* =====================================================
-       ⓭  TESTIMONIALS
-    ===================================================== */
-    #reviews { background:var(--ink); text-align:center; }
-
-    .rev-head { margin-bottom:5.5rem; }
-
-    .rev-grid {
-      display:grid; grid-template-columns:repeat(3,1fr);
-      gap:2.5rem; text-align:left;
-    }
-
-    .rev-card {
-      padding:2.8rem 2.5rem;
-      border:1px solid var(--gold-dim);
-      position:relative;
-      transition:border-color .4s, transform .5s var(--ease-lux);
-    }
-
-    .rev-card::before {
-      content:'"'; position:absolute;
-      top:-1.5rem; left:2rem;
-      font-family:var(--ff-display); font-size:6rem;
-      color:var(--gold); opacity:.2; line-height:1;
-    }
-
-    .rev-card:hover {
-      border-color:rgba(191,160,106,.45);
-      transform:translateY(-9px);
-    }
-
-    .rev-stars { color:var(--gold); font-size:.75rem; letter-spacing:.2em; margin-bottom:1.1rem; }
-
-    .rev-text {
-      font-family:var(--ff-accent); font-size:1.05rem;
-      font-style:italic; font-weight:300;
-      line-height:1.85; color:var(--cream);
-      margin-bottom:1.8rem;
-    }
-
-    .rev-author { display:flex; align-items:center; gap:1rem; }
-
-    .rev-avatar {
-      width:42px; height:42px; border-radius:50%;
-      background:var(--gold-dim);
-      display:flex; align-items:center; justify-content:center;
-      font-family:var(--ff-display); font-size:1.1rem;
-      color:var(--gold); flex-shrink:0;
-    }
-
-    .rev-name  { font-family:var(--ff-body); font-size:.78rem; font-weight:500; }
-    .rev-loc   { font-family:var(--ff-body); font-size:.65rem; color:var(--gold); margin-top:.2rem; }
-
-    /* =====================================================
-       ⓮  BOOKING
-    ===================================================== */
-    #booking {
-      background:var(--ink-2); position:relative; overflow:hidden;
-    }
-
-    #booking::before {
-      content:''; position:absolute; top:0; left:0; right:0;
-      height:1px;
-      background:linear-gradient(to right, transparent, var(--gold), transparent);
-    }
-
-    .book-inner {
-      display:grid; grid-template-columns:1fr 1fr;
-      gap:9rem; align-items:start;
-    }
-
-    .book-copy { font-family:var(--ff-body); font-size:.92rem; font-weight:300; line-height:2.05; color:var(--cream-50); margin:1.8rem 0 2.8rem; }
-
-    .book-contact { display:flex; gap:3rem; flex-wrap:wrap; }
-
-    .bc-label { font-family:var(--ff-body); font-size:.58rem; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); margin-bottom:.5rem; }
-
-    .bc-val { font-family:var(--ff-accent); font-size:1.15rem; color:var(--cream); }
-
-    /* form */
-    .bk-form { display:flex; flex-direction:column; gap:1.5rem; }
-
-    .f-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-
-    .f-group { display:flex; flex-direction:column; gap:.5rem; }
-
-    .f-label { font-family:var(--ff-body); font-size:.58rem; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); }
-
-    .f-input, .f-select {
-      background:rgba(255,255,255,.03);
-      border:1px solid var(--gold-dim);
-      color:var(--cream);
-      font-family:var(--ff-body); font-size:.88rem; font-weight:300;
-      padding:.95rem 1.2rem; outline:none;
-      transition:border-color .3s;
-      width:100%;
-    }
-
-    .f-input:focus, .f-select:focus { border-color:var(--gold); }
-    .f-input::placeholder { color:var(--cream-30); }
-
-    .f-select { appearance:none; cursor:pointer; }
-    .f-select option { background:var(--ink-2); }
-
-    .btn-submit {
-      background:var(--gold); color:var(--ink);
-      font-family:var(--ff-body); font-size:.67rem;
-      letter-spacing:.3em; text-transform:uppercase;
-      padding:1.25rem; border:none; cursor:pointer;
-      position:relative; overflow:hidden;
-      transition:transform .3s var(--ease-lux);
-    }
-
-    .btn-submit::before {
-      content:''; position:absolute; inset:0;
-      background:var(--gold-lt); transform:translateX(-100%);
-      transition:transform .45s var(--ease-lux);
-    }
-
-    .btn-submit:hover { transform:translateY(-3px); }
-    .btn-submit:hover::before { transform:none; }
-    .btn-submit span { position:relative; z-index:1; }
-
-    /* =====================================================
-       ⓯  FOOTER
-    ===================================================== */
-    footer {
-      background:var(--ink); padding:7rem 5rem 3rem;
-      border-top:1px solid var(--gold-dim);
-    }
-
-    .ft-grid {
-      display:grid; grid-template-columns:2fr 1fr 1fr 1fr;
-      gap:5rem; margin-bottom:5rem;
-    }
-
-    .ft-logo { font-family:var(--ff-display); font-size:1.2rem; font-weight:400; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:1.5rem; }
-
-    .ft-desc { font-family:var(--ff-body); font-size:.82rem; font-weight:300; line-height:1.85; color:var(--cream-50); margin-bottom:2rem; }
-
-    .ft-socials { display:flex; gap:.8rem; }
-
-    .ft-soc {
-      width:34px; height:34px; border:1px solid var(--gold-dim);
-      display:flex; align-items:center; justify-content:center;
-      font-family:var(--ff-body); font-size:.7rem;
-      color:var(--gold); transition:all .3s;
-    }
-
-    .ft-soc:hover { background:var(--gold); color:var(--ink); border-color:var(--gold); }
-
-    .ft-col-title { font-family:var(--ff-body); font-size:.58rem; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); margin-bottom:1.6rem; }
-
-    .ft-links { list-style:none; display:flex; flex-direction:column; gap:.9rem; }
-
-    .ft-links a { font-family:var(--ff-body); font-size:.8rem; font-weight:300; color:var(--cream-50); transition:color .3s, padding-left .3s var(--ease-lux); }
-
-    .ft-links a:hover { color:var(--gold); padding-left:.4rem; }
-
-    .ft-bottom {
-      display:flex; justify-content:space-between; align-items:center;
-      padding-top:2.5rem; border-top:1px solid var(--gold-dim);
-    }
-
-    .ft-copy { font-family:var(--ff-body); font-size:.63rem; color:rgba(242,237,228,.22); letter-spacing:.1em; }
-
-    .ft-legal { display:flex; gap:2.2rem; }
-
-    .ft-legal a { font-family:var(--ff-body); font-size:.63rem; color:rgba(242,237,228,.22); letter-spacing:.1em; transition:color .3s; }
-    .ft-legal a:hover { color:var(--gold); }
-
-    /* =====================================================
-       ⓰  RESPONSIVE
-    ===================================================== */
-    @media (max-width:1100px) {
-      #nav, #nav.stuck { padding-left:2.5rem; padding-right:2.5rem; }
-      section { padding:8rem 2.5rem; }
-      #about { grid-template-columns:1fr; gap:4rem; }
-      .about-visual { max-height:420px; }
-      .exp-grid { grid-template-columns:1fr 1fr; }
-      .rooms-grid { grid-template-columns:1fr; }
-      .rev-grid { grid-template-columns:1fr; }
-      .book-inner { grid-template-columns:1fr; gap:4rem; }
-      .ft-grid { grid-template-columns:1fr 1fr; gap:3rem; }
-    }
-
-    @media (max-width:720px) {
-      .nav-links { display:none; }
-      .hero-content { padding:0 2rem; }
-      .hero-btns { flex-direction:column; align-items:flex-start; }
-      .hero-scroll { left:2rem; }
-      .exp-grid { grid-template-columns:1fr; }
-      .gal-grid { grid-template-columns:1fr 1fr; }
-      .gal-item:nth-child(1),
-      .gal-item:nth-child(5) { grid-column:span 2; }
-      .f-row { grid-template-columns:1fr; }
-      .ft-grid { grid-template-columns:1fr; gap:2.5rem; }
-      .gallery-head, footer { padding-left:2rem; padding-right:2rem; }
+      --ink:      #050403;
+      --ink-2:    #0C0A07;
+      --ink-3:    #141008;
+      --gold:     #BFA06A;
+      --gold-lt:  #D4B87A;
+      --gold-dim: rgba(191,160,106,.18);
+      --cream:    #F2EDE4;
+      --c50:      rgba(242,237,228,.55);
+      --c30:      rgba(242,237,228,.28);
+      --ff-d:     'Playfair Display', Georgia, serif;
+      --ff-b:     'DM Sans', system-ui, sans-serif;
+      --ff-a:     'Cormorant Garamond', Georgia, serif;
+      --ease:     cubic-bezier(.22,1,.36,1);
+    }
+
+    /* ── Reset ── */
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+    body{background:var(--ink);color:var(--cream);font-family:var(--ff-b);overflow-x:hidden;cursor:none}
+    img{display:block;max-width:100%}
+    a{text-decoration:none;color:inherit}
+    ::-webkit-scrollbar{width:2px}
+    ::-webkit-scrollbar-thumb{background:var(--gold)}
+
+    /* ══════════════════════════════════════
+       CURSOR
+    ══════════════════════════════════════ */
+    #cur-dot{position:fixed;width:8px;height:8px;border-radius:50%;background:var(--gold);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s,height .25s}
+    #cur-ring{position:fixed;width:38px;height:38px;border:1px solid rgba(191,160,106,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .35s var(--ease),height .35s var(--ease),border-color .3s}
+    body.hov #cur-ring{width:54px;height:54px;border-color:var(--gold)}
+    body.hov #cur-dot{width:4px;height:4px}
+
+    /* ══════════════════════════════════════
+       LOADER
+    ══════════════════════════════════════ */
+    #loader{
+      position:fixed;inset:0;z-index:10000;background:var(--ink);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2rem
+    }
+    .ldr-logo{
+      font-family:var(--ff-d);font-size:2rem;font-weight:400;
+      letter-spacing:.6em;text-transform:uppercase;color:var(--gold);
+      opacity:0;animation:ldUp .9s var(--ease) .2s forwards
+    }
+    .ldr-cap{
+      font-family:var(--ff-b);font-size:.58rem;letter-spacing:.45em;text-transform:uppercase;
+      color:var(--gold);opacity:0;animation:ldUp .9s var(--ease) .5s forwards
+    }
+    .ldr-track{width:200px;height:1px;background:rgba(191,160,106,.12);overflow:hidden}
+    #ldr-fill{height:100%;width:0;background:var(--gold);transition:width 1.8s var(--ease)}
+    @keyframes ldUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+    /* ══════════════════════════════════════
+       NAVIGATION
+    ══════════════════════════════════════ */
+    #nav{
+      position:fixed;top:0;left:0;right:0;z-index:500;
+      padding:2rem 5rem;display:flex;align-items:center;justify-content:space-between;
+      transition:padding .5s,background .5s,backdrop-filter .5s,border-color .5s;
+      border-bottom:1px solid transparent
+    }
+    #nav.stuck{padding:1.1rem 5rem;background:rgba(5,4,3,.88);backdrop-filter:blur(24px);border-bottom-color:var(--gold-dim)}
+    .nav-logo{font-family:var(--ff-d);font-size:1.05rem;font-weight:500;letter-spacing:.35em;text-transform:uppercase;color:var(--gold)}
+    .nav-links{list-style:none;display:flex;gap:3rem}
+    .nav-links a{font-family:var(--ff-b);font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--c50);position:relative;transition:color .3s}
+    .nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--gold);transition:width .4s var(--ease)}
+    .nav-links a:hover{color:var(--gold)}
+    .nav-links a:hover::after{width:100%}
+    .nav-cta{font-family:var(--ff-b);font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:.7rem 1.9rem;transition:background .3s,transform .3s var(--ease)}
+    .nav-cta:hover{background:var(--gold-lt);transform:translateY(-2px)}
+
+    /* ══════════════════════════════════════
+       HERO
+    ══════════════════════════════════════ */
+    #hero{position:relative;height:100svh;min-height:620px;overflow:hidden;display:flex;align-items:center}
+    #c3d{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block}
+
+    .hero-content{position:relative;z-index:2;padding:0 5rem;max-width:660px}
+    .hero-eyebrow{
+      font-family:var(--ff-b);font-size:.6rem;letter-spacing:.5em;text-transform:uppercase;
+      color:var(--gold);margin-bottom:2rem;display:flex;align-items:center;gap:1rem;
+      opacity:0;transform:translateY(18px)
+    }
+    .hero-eyebrow::before{content:'';width:26px;height:1px;background:var(--gold);flex-shrink:0}
+    .hero-h1{
+      font-family:var(--ff-d);font-size:clamp(3rem,7vw,7.2rem);
+      font-weight:400;line-height:1.02;letter-spacing:-.02em;overflow:hidden;margin-bottom:2.2rem
+    }
+    .h1-line{display:block;opacity:0;transform:translateY(105%)}
+    .h1-line em{font-style:italic;color:var(--gold)}
+    .hero-body{
+      font-family:var(--ff-b);font-size:.9rem;font-weight:300;line-height:1.92;
+      color:var(--c50);max-width:380px;margin-bottom:2.8rem;opacity:0;transform:translateY(18px)
+    }
+    .hero-btns{display:flex;gap:1.8rem;align-items:center;opacity:0;transform:translateY(18px)}
+
+    .btn-fill{
+      font-family:var(--ff-b);font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;
+      color:var(--ink);background:var(--gold);padding:1.1rem 2.6rem;
+      display:inline-block;position:relative;overflow:hidden;transition:transform .4s var(--ease)
+    }
+    .btn-fill::before{content:'';position:absolute;inset:0;background:var(--gold-lt);transform:translateX(-100%);transition:transform .45s var(--ease)}
+    .btn-fill:hover{transform:translateY(-3px)}
+    .btn-fill:hover::before{transform:none}
+    .btn-fill span{position:relative;z-index:1}
+
+    .btn-ghost{
+      font-family:var(--ff-b);font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;
+      color:var(--c50);display:flex;align-items:center;gap:.65rem;
+      transition:color .3s,gap .3s var(--ease)
+    }
+    .btn-ghost:hover{color:var(--gold);gap:1rem}
+
+    .hero-scroll{
+      position:absolute;bottom:2.5rem;left:5rem;z-index:2;
+      display:flex;flex-direction:column;align-items:center;gap:.6rem;opacity:0
+    }
+    .hs-line{width:1px;height:52px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrAnim 2s ease-in-out infinite}
+    .hs-text{font-family:var(--ff-b);font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);writing-mode:vertical-rl}
+    @keyframes scrAnim{0%{transform:scaleY(0);transform-origin:top;opacity:0}30%{opacity:1}60%{transform:scaleY(1);transform-origin:top}61%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}}
+
+    /* ══════════════════════════════════════
+       MARQUEE
+    ══════════════════════════════════════ */
+    .mq-wrap{overflow:hidden;padding:1.3rem 0;background:var(--gold)}
+    .mq-inner{display:flex;gap:2.5rem;white-space:nowrap;animation:mq 28s linear infinite}
+    .mq-item{font-family:var(--ff-a);font-size:.93rem;font-style:italic;color:var(--ink);flex-shrink:0;opacity:.88}
+    .mq-sep{flex-shrink:0;color:rgba(5,4,3,.3);font-size:.7rem;align-self:center}
+    @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* ══════════════════════════════════════
+       SECTION PRIMITIVES
+    ══════════════════════════════════════ */
+    section{padding:11rem 5rem}
+    .sec-label{
+      font-family:var(--ff-b);font-size:.58rem;letter-spacing:.5em;text-transform:uppercase;
+      color:var(--gold);margin-bottom:1.8rem;display:flex;align-items:center;gap:1rem
+    }
+    .sec-label::before{content:'';width:24px;height:1px;background:var(--gold);flex-shrink:0}
+    .sec-title{font-family:var(--ff-d);font-size:clamp(2.2rem,4.2vw,4.8rem);font-weight:400;line-height:1.1}
+    .sec-title em{font-style:italic;color:var(--gold)}
+    .rv{opacity:0}
+    .rv-up{transform:translateY(42px)}
+    .rv-lft{transform:translateX(-42px)}
+    .rv-rgt{transform:translateX(42px)}
+
+    /* ══════════════════════════════════════
+       ABOUT
+    ══════════════════════════════════════ */
+    #about{background:var(--ink-2);display:grid;grid-template-columns:1fr 1fr;gap:9rem;align-items:center}
+    .abt-vis{position:relative;aspect-ratio:3/4;overflow:hidden}
+    .abt-img{width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(1.1);transition:transform 7s}
+    .abt-vis:hover .abt-img{transform:scale(1.07)}
+    .abt-gloss{position:absolute;inset:0;background:linear-gradient(135deg,rgba(191,160,106,.16) 0%,transparent 50%),linear-gradient(to top,rgba(5,4,3,.7) 0%,transparent 55%)}
+    .abt-idx{position:absolute;bottom:-2rem;right:-1.5rem;font-family:var(--ff-d);font-size:9rem;color:rgba(191,160,106,.06);line-height:1;user-select:none;pointer-events:none}
+    .abt-copy{font-family:var(--ff-b);font-size:.9rem;font-weight:300;line-height:2.05;color:var(--c50);margin:1.8rem 0 3.5rem}
+    .abt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;padding-top:2.5rem;border-top:1px solid var(--gold-dim)}
+    .stat-num{font-family:var(--ff-d);font-size:2.6rem;color:var(--gold);line-height:1}
+    .stat-lbl{font-family:var(--ff-b);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--c30);margin-top:.4rem}
+
+    /* ══════════════════════════════════════
+       EXPERIENCES
+    ══════════════════════════════════════ */
+    #experiences{background:var(--ink-3)}
+    .exp-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:5rem}
+    .exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+    .exp-card{position:relative;aspect-ratio:2/3;overflow:hidden;cursor:pointer}
+    .exp-img{width:100%;height:100%;object-fit:cover;filter:brightness(.58) saturate(1.2);transition:transform .9s var(--ease),filter .9s}
+    .exp-card:hover .exp-img{transform:scale(1.09);filter:brightness(.42) saturate(1.4)}
+    .exp-veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,4,3,.95) 0%,rgba(5,4,3,.4) 42%,transparent 68%)}
+    .exp-info{position:absolute;bottom:0;left:0;right:0;padding:2.4rem;transform:translateY(10px);transition:transform .55s var(--ease)}
+    .exp-card:hover .exp-info{transform:none}
+    .exp-num{font-family:var(--ff-b);font-size:.56rem;letter-spacing:.4em;color:var(--gold);margin-bottom:.45rem}
+    .exp-title{font-family:var(--ff-d);font-size:1.85rem;font-weight:400;margin-bottom:.8rem}
+    .exp-desc{font-family:var(--ff-b);font-size:.78rem;font-weight:300;line-height:1.75;color:var(--c50);max-height:0;overflow:hidden;opacity:0;transition:max-height .6s var(--ease),opacity .5s}
+    .exp-card:hover .exp-desc{max-height:80px;opacity:1}
+    .exp-link{display:inline-flex;align-items:center;gap:.45rem;font-family:var(--ff-b);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-top:1rem;opacity:0;transition:opacity .5s}
+    .exp-card:hover .exp-link{opacity:1}
+
+    /* ══════════════════════════════════════
+       ROOMS
+    ══════════════════════════════════════ */
+    #rooms{background:var(--ink)}
+    .rooms-head{text-align:center;margin-bottom:6rem}
+    .rooms-grid{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem}
+    .room-card{cursor:pointer}
+    .room-img-wrap{aspect-ratio:16/10;overflow:hidden;margin-bottom:1.5rem;position:relative}
+    .room-img{width:100%;height:100%;object-fit:cover;filter:brightness(.76) saturate(1.1);transition:transform .85s var(--ease)}
+    .room-card:hover .room-img{transform:scale(1.06)}
+    .room-badge{position:absolute;top:1.2rem;right:1.2rem;background:var(--gold);color:var(--ink);font-family:var(--ff-b);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;padding:.3rem .8rem}
+    .room-name{font-family:var(--ff-d);font-size:1.5rem;font-weight:400;margin-bottom:.55rem}
+    .room-specs{display:flex;gap:1.6rem;flex-wrap:wrap;margin-bottom:1.1rem}
+    .room-spec{font-family:var(--ff-b);font-size:.68rem;font-weight:300;color:var(--c50)}
+    .room-footer{display:flex;align-items:center;justify-content:space-between;padding-top:1.1rem;border-top:1px solid var(--gold-dim)}
+    .room-price{font-family:var(--ff-d);font-size:1.6rem;color:var(--gold)}
+    .room-per{font-family:var(--ff-b);font-size:.6rem;color:var(--c30)}
+    .btn-sm{font-family:var(--ff-b);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:.65rem 1.4rem;display:inline-block;transition:background .3s,transform .3s var(--ease)}
+    .btn-sm:hover{background:var(--gold-lt);transform:translateY(-2px)}
+
+    /* ══════════════════════════════════════
+       GALLERY
+    ══════════════════════════════════════ */
+    #gallery{background:var(--ink-2);padding:11rem 0}
+    .gal-head{padding:0 5rem;margin-bottom:4rem}
+    .gal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+    .gal-item{overflow:hidden;position:relative;min-height:240px;cursor:pointer}
+    .gal-item:nth-child(1){grid-column:span 2;grid-row:span 2}
+    .gal-item:nth-child(5){grid-column:span 2}
+    .gal-img{width:100%;height:100%;object-fit:cover;filter:brightness(.7) saturate(1.1);transition:transform .85s var(--ease),filter .85s}
+    .gal-item:hover .gal-img{transform:scale(1.07);filter:brightness(.52) saturate(1.3)}
+    .gal-ov{position:absolute;inset:0;background:rgba(191,160,106,.1);opacity:0;transition:opacity .4s;display:flex;align-items:center;justify-content:center}
+    .gal-item:hover .gal-ov{opacity:1}
+    .gal-plus{font-family:var(--ff-d);font-size:2.5rem;color:#fff;opacity:.7}
+
+    /* ══════════════════════════════════════
+       REVIEWS
+    ══════════════════════════════════════ */
+    #reviews{background:var(--ink);text-align:center}
+    .rev-head{margin-bottom:5rem}
+    .rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4rem;text-align:left}
+    .rev-card{padding:2.6rem 2.4rem;border:1px solid var(--gold-dim);position:relative;transition:border-color .4s,transform .5s var(--ease)}
+    .rev-card::before{content:'"';position:absolute;top:-1.4rem;left:1.8rem;font-family:var(--ff-d);font-size:5.5rem;color:var(--gold);opacity:.2;line-height:1}
+    .rev-card:hover{border-color:rgba(191,160,106,.42);transform:translateY(-8px)}
+    .rev-stars{color:var(--gold);font-size:.72rem;letter-spacing:.2em;margin-bottom:1rem}
+    .rev-text{font-family:var(--ff-a);font-size:1.02rem;font-style:italic;font-weight:300;line-height:1.88;color:var(--cream);margin-bottom:1.6rem}
+    .rev-auth{display:flex;align-items:center;gap:1rem}
+    .rev-av{width:40px;height:40px;border-radius:50%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:var(--ff-d);font-size:1rem;color:var(--gold);flex-shrink:0}
+    .rev-name{font-family:var(--ff-b);font-size:.76rem;font-weight:500}
+    .rev-loc{font-family:var(--ff-b);font-size:.63rem;color:var(--gold);margin-top:.15rem}
+
+    /* ══════════════════════════════════════
+       BOOKING
+    ══════════════════════════════════════ */
+    #booking{background:var(--ink-2);position:relative;overflow:hidden}
+    #booking::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
+    .bk-inner{display:grid;grid-template-columns:1fr 1fr;gap:9rem;align-items:start}
+    .bk-copy{font-family:var(--ff-b);font-size:.9rem;font-weight:300;line-height:2.05;color:var(--c50);margin:1.6rem 0 2.6rem}
+    .bk-contact{display:flex;gap:3rem;flex-wrap:wrap}
+    .bc-lbl{font-family:var(--ff-b);font-size:.56rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem}
+    .bc-val{font-family:var(--ff-a);font-size:1.1rem;color:var(--cream)}
+    .bk-form{display:flex;flex-direction:column;gap:1.4rem}
+    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .f-grp{display:flex;flex-direction:column;gap:.45rem}
+    .f-lbl{font-family:var(--ff-b);font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+    .f-inp,.f-sel{background:rgba(255,255,255,.03);border:1px solid var(--gold-dim);color:var(--cream);font-family:var(--ff-b);font-size:.86rem;font-weight:300;padding:.9rem 1.1rem;outline:none;transition:border-color .3s;width:100%}
+    .f-inp:focus,.f-sel:focus{border-color:var(--gold)}
+    .f-inp::placeholder{color:var(--c30)}
+    .f-sel{appearance:none;cursor:pointer}
+    .f-sel option{background:var(--ink-2)}
+    .btn-sub{background:var(--gold);color:var(--ink);font-family:var(--ff-b);font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;padding:1.2rem;border:none;cursor:pointer;position:relative;overflow:hidden;transition:transform .3s var(--ease);width:100%}
+    .btn-sub::before{content:'';position:absolute;inset:0;background:var(--gold-lt);transform:translateX(-100%);transition:transform .45s var(--ease)}
+    .btn-sub:hover{transform:translateY(-3px)}
+    .btn-sub:hover::before{transform:none}
+    .btn-sub span{position:relative;z-index:1}
+
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
+    footer{background:var(--ink);padding:7rem 5rem 3rem;border-top:1px solid var(--gold-dim)}
+    .ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:5rem;margin-bottom:5rem}
+    .ft-logo{font-family:var(--ff-d);font-size:1.15rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:1.4rem}
+    .ft-desc{font-family:var(--ff-b);font-size:.8rem;font-weight:300;line-height:1.88;color:var(--c50);margin-bottom:1.8rem}
+    .ft-socs{display:flex;gap:.75rem}
+    .ft-soc{width:34px;height:34px;border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:var(--ff-b);font-size:.68rem;color:var(--gold);transition:all .3s}
+    .ft-soc:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+    .ft-ctitle{font-family:var(--ff-b);font-size:.56rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem}
+    .ft-links{list-style:none;display:flex;flex-direction:column;gap:.85rem}
+    .ft-links a{font-family:var(--ff-b);font-size:.78rem;font-weight:300;color:var(--c50);transition:color .3s,padding-left .3s var(--ease)}
+    .ft-links a:hover{color:var(--gold);padding-left:.4rem}
+    .ft-bot{display:flex;justify-content:space-between;align-items:center;padding-top:2.5rem;border-top:1px solid var(--gold-dim)}
+    .ft-copy{font-family:var(--ff-b);font-size:.6rem;color:rgba(242,237,228,.2);letter-spacing:.1em}
+    .ft-leg{display:flex;gap:2rem}
+    .ft-leg a{font-family:var(--ff-b);font-size:.6rem;color:rgba(242,237,228,.2);letter-spacing:.1em;transition:color .3s}
+    .ft-leg a:hover{color:var(--gold)}
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media(max-width:1100px){
+      #nav,#nav.stuck{padding-left:2.5rem;padding-right:2.5rem}
+      section{padding:8rem 2.5rem}
+      #about{grid-template-columns:1fr;gap:4rem}
+      .abt-vis{max-height:420px}
+      .exp-grid{grid-template-columns:1fr 1fr}
+      .rooms-grid{grid-template-columns:1fr}
+      .rev-grid{grid-template-columns:1fr}
+      .bk-inner{grid-template-columns:1fr;gap:4rem}
+      .ft-grid{grid-template-columns:1fr 1fr;gap:3rem}
+    }
+    @media(max-width:720px){
+      .nav-links{display:none}
+      .hero-content{padding:0 2rem}
+      .hero-btns{flex-direction:column;align-items:flex-start}
+      .hero-scroll{left:2rem}
+      .exp-grid{grid-template-columns:1fr}
+      .gal-grid{grid-template-columns:1fr 1fr}
+      .gal-item:nth-child(1),.gal-item:nth-child(5){grid-column:span 2}
+      .f-row{grid-template-columns:1fr}
+      .ft-grid{grid-template-columns:1fr;gap:2.5rem}
+      .gal-head,footer{padding-left:2rem;padding-right:2rem}
     }
   </style>
-
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════
-     LOADING SCREEN
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ LOADER ══════════════ -->
 <div id="loader">
-  <div class="ldr-brand">MAISON NOMADE</div>
-  <div class="ldr-track"><div class="ldr-fill" id="ldr-fill"></div></div>
-  <div class="ldr-caption">Preparing your journey</div>
+  <div class="ldr-logo">Maison Nomade</div>
+  <div class="ldr-cap">Preparing your journey · Préparation du voyage</div>
+  <div class="ldr-track"><div id="ldr-fill"></div></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     CUSTOM CURSOR
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ CURSOR ══════════════ -->
 <div id="cur-dot"></div>
 <div id="cur-ring"></div>
 
-<!-- ══════════════════════════════════════════════════════
-     NAVIGATION
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ NAV ══════════════ -->
 <nav id="nav">
   <a href="#" class="nav-logo">Maison Nomade</a>
   <ul class="nav-links">
-    <li><a href="#about">Notre histoire</a></li>
+    <li><a href="#about">Histoire</a></li>
     <li><a href="#experiences">Expériences</a></li>
     <li><a href="#rooms">Suites</a></li>
     <li><a href="#gallery">Galerie</a></li>
@@ -865,61 +344,40 @@
   <a href="#booking" class="nav-cta">Réserver</a>
 </nav>
 
-<!-- ══════════════════════════════════════════════════════
-     HERO
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ HERO ══════════════ -->
 <section id="hero">
   <canvas id="c3d"></canvas>
-
   <div class="hero-content">
     <p class="hero-eyebrow">Marrakech · Fès · Sahara</p>
-
-```
-<h1 class="hero-h1">
-  <span class="h1-line">Où le luxe</span>
-  <span class="h1-line"><em>rencontre</em></span>
-  <span class="h1-line">l'âme du voyage</span>
-</h1>
-
-<p class="hero-body">
-  Une collection intime de riads et de retraites désertiques pour ceux
-  qui cherchent l'authenticité sans compromis.
-</p>
-
-<div class="hero-btns">
-  <a href="#booking" class="btn-fill"><span>Réserver votre séjour</span></a>
-  <a href="#experiences" class="btn-ghost">
-    Découvrir
-    <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
-      <path d="M9 1l4 4m0 0l-4 4m4-4H1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-    </svg>
-  </a>
-</div>
-```
-
+    <h1 class="hero-h1">
+      <span class="h1-line">Où le luxe</span>
+      <span class="h1-line"><em>rencontre</em></span>
+      <span class="h1-line">l'âme du voyage</span>
+    </h1>
+    <p class="hero-body">Une collection intime de riads et de retraites désertiques pour ceux qui cherchent l'authenticité sans compromis.</p>
+    <div class="hero-btns">
+      <a href="#booking" class="btn-fill"><span>Réserver votre séjour</span></a>
+      <a href="#experiences" class="btn-ghost">
+        Découvrir
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M9 1l4 4m0 0l-4 4m4-4H1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </a>
+    </div>
   </div>
-
   <div class="hero-scroll">
     <div class="hs-line"></div>
     <span class="hs-text">Scroll</span>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════
-     MARQUEE BAND
-══════════════════════════════════════════════════════ -->
-
-<div class="marquee-wrap" aria-hidden="true">
-  <div class="marquee-inner">
-    <!-- set 1 -->
+<!-- ══════════════ MARQUEE ══════════════ -->
+<div class="mq-wrap" aria-hidden="true">
+  <div class="mq-inner">
     <span class="mq-item">Riads de luxe</span><span class="mq-sep">◆</span>
     <span class="mq-item">Expériences privées</span><span class="mq-sep">◆</span>
     <span class="mq-item">Retraites désertiques</span><span class="mq-sep">◆</span>
     <span class="mq-item">Maroc authentique</span><span class="mq-sep">◆</span>
     <span class="mq-item">Cinq étoiles</span><span class="mq-sep">◆</span>
     <span class="mq-item">Voyages sur-mesure</span><span class="mq-sep">◆</span>
-    <!-- set 2 (mirror) -->
     <span class="mq-item">Riads de luxe</span><span class="mq-sep">◆</span>
     <span class="mq-item">Expériences privées</span><span class="mq-sep">◆</span>
     <span class="mq-item">Retraites désertiques</span><span class="mq-sep">◆</span>
@@ -929,970 +387,787 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     ABOUT
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ ABOUT ══════════════ -->
 <section id="about">
-  <!-- visual column -->
-  <div class="about-visual rv rv-lft">
-    <img class="about-img"
-      src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=900&q=82&auto=format&fit=crop"
-      alt="Riad courtyard — zellige mosaics and lanterns">
-    <div class="about-gloss"></div>
-    <div class="about-index">01</div>
+  <div class="abt-vis rv rv-lft">
+    <img class="abt-img" src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=900&q=82&auto=format&fit=crop" alt="Riad courtyard">
+    <div class="abt-gloss"></div>
+    <div class="abt-idx">01</div>
   </div>
-
-  <!-- text column -->
-
-  <div class="about-text-col">
+  <div>
     <p class="sec-label rv rv-up">Notre Histoire</p>
-    <h2 class="sec-title rv rv-up">
-      Créer des instants<br>qui <em>durent</em><br>toute une vie
-    </h2>
-    <p class="about-copy rv rv-up">
-      Depuis 2008, MAISON NOMADE réinvente le voyage de luxe au Maroc.
-      Nous croyons que le vrai luxe ne réside pas dans l'opulence seule,
-      mais dans la connexion profonde entre l'hôte, le lieu et la culture.
-      Chaque propriété de notre collection est un sanctuaire — un endroit
-      où les rythmes anciens de la vie marocaine s'harmonisent avec le
-      confort contemporain.
-    </p>
-
-```
-<div class="about-stats">
-  <div class="rv rv-up">
-    <div class="stat-num" data-target="15">0</div>
-    <div class="stat-lbl">Propriétés exclusives</div>
-  </div>
-  <div class="rv rv-up">
-    <div class="stat-num" data-target="8">0</div>
-    <div class="stat-lbl">Milliers de voyageurs</div>
-  </div>
-  <div class="rv rv-up">
-    <div class="stat-num" data-target="16">0</div>
-    <div class="stat-lbl">Années d'excellence</div>
-  </div>
-</div>
-```
-
+    <h2 class="sec-title rv rv-up">Créer des instants<br>qui <em>durent</em><br>toute une vie</h2>
+    <p class="abt-copy rv rv-up">Depuis 2008, MAISON NOMADE réinvente le voyage de luxe au Maroc. Nous croyons que le vrai luxe ne réside pas dans l'opulence seule, mais dans la connexion profonde entre l'hôte, le lieu et la culture. Chaque propriété est un sanctuaire — là où les rythmes anciens de la vie marocaine s'harmonisent avec le confort contemporain.</p>
+    <div class="abt-stats">
+      <div class="rv rv-up"><div class="stat-num" data-target="15">0</div><div class="stat-lbl">Propriétés exclusives</div></div>
+      <div class="rv rv-up"><div class="stat-num" data-target="8">0</div><div class="stat-lbl">Milliers de voyageurs</div></div>
+      <div class="rv rv-up"><div class="stat-num" data-target="16">0</div><div class="stat-lbl">Années d'excellence</div></div>
+    </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════
-     EXPERIENCES
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ EXPERIENCES ══════════════ -->
 <section id="experiences">
   <div class="exp-head">
     <div>
       <p class="sec-label rv rv-up">Ce que nous offrons</p>
       <h2 class="sec-title rv rv-up">Expériences<br><em>inoubliables</em></h2>
     </div>
-    <a href="#" class="btn-ghost rv rv-rgt">
-      Toutes les expériences
-      <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
-        <path d="M9 1l4 4m0 0l-4 4m4-4H1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
-    </a>
+    <a href="#" class="btn-ghost rv rv-rgt">Toutes les expériences <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M9 1l4 4m0 0l-4 4m4-4H1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
   </div>
-
   <div class="exp-grid">
-    <!-- card 1 -->
     <div class="exp-card">
-      <img class="exp-img"
-        src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=700&q=80&auto=format&fit=crop"
-        alt="Sahara Journey" loading="lazy">
+      <img class="exp-img" src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=700&q=80&auto=format&fit=crop" alt="Sahara" loading="lazy">
       <div class="exp-veil"></div>
       <div class="exp-info">
         <div class="exp-num">01</div>
         <h3 class="exp-title">Odyssée du Sahara</h3>
-        <p class="exp-desc">Dormez sous un milliard d'étoiles dans notre camp désertique privé. Vivez le silence et la magie du Sahara avec des guides experts.</p>
+        <p class="exp-desc">Dormez sous un milliard d'étoiles dans notre camp désertique privé avec guides experts.</p>
         <a href="#" class="exp-link">Découvrir →</a>
       </div>
     </div>
-
-```
-<!-- card 2 -->
-<div class="exp-card">
-  <img class="exp-img"
-    src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=700&q=80&auto=format&fit=crop"
-    alt="Hammam Rituals" loading="lazy">
-  <div class="exp-veil"></div>
-  <div class="exp-info">
-    <div class="exp-num">02</div>
-    <h3 class="exp-title">Rituel du Hammam</h3>
-    <p class="exp-desc">Un rituel de purification transmis depuis des siècles. Nos artisans maîtres vous guident dans une expérience de hammam authentique.</p>
-    <a href="#" class="exp-link">Découvrir →</a>
-  </div>
-</div>
-
-<!-- card 3 -->
-<div class="exp-card">
-  <img class="exp-img"
-    src="https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=700&q=80&auto=format&fit=crop"
-    alt="Culinary Journey" loading="lazy">
-  <div class="exp-veil"></div>
-  <div class="exp-info">
-    <div class="exp-num">03</div>
-    <h3 class="exp-title">Voyage Culinaire</h3>
-    <p class="exp-desc">Du souk à la table — apprenez les secrets de la cuisine marocaine avec nos chefs privés au cœur de la médina.</p>
-    <a href="#" class="exp-link">Découvrir →</a>
-  </div>
-</div>
-```
-
+    <div class="exp-card">
+      <img class="exp-img" src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=700&q=80&auto=format&fit=crop" alt="Hammam" loading="lazy">
+      <div class="exp-veil"></div>
+      <div class="exp-info">
+        <div class="exp-num">02</div>
+        <h3 class="exp-title">Rituel du Hammam</h3>
+        <p class="exp-desc">Un rituel de purification transmis depuis des siècles par nos maîtres artisans.</p>
+        <a href="#" class="exp-link">Découvrir →</a>
+      </div>
+    </div>
+    <div class="exp-card">
+      <img class="exp-img" src="https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=700&q=80&auto=format&fit=crop" alt="Culinary" loading="lazy">
+      <div class="exp-veil"></div>
+      <div class="exp-info">
+        <div class="exp-num">03</div>
+        <h3 class="exp-title">Voyage Culinaire</h3>
+        <p class="exp-desc">Du souk à la table — apprenez les secrets de la cuisine marocaine avec nos chefs privés.</p>
+        <a href="#" class="exp-link">Découvrir →</a>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════
-     ROOMS / SUITES
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ ROOMS ══════════════ -->
 <section id="rooms">
   <div class="rooms-head">
-    <p class="sec-label rv rv-up" style="justify-content:center;">Nos Suites</p>
+    <p class="sec-label rv rv-up" style="justify-content:center">Nos Suites</p>
     <h2 class="sec-title rv rv-up">Un sanctuaire<br>pour chaque <em>âme</em></h2>
   </div>
-
   <div class="rooms-grid">
-    <!-- suite 1 -->
     <div class="room-card rv rv-up">
       <div class="room-img-wrap">
-        <img class="room-img"
-          src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=900&q=80&auto=format&fit=crop"
-          alt="La Suite Impériale" loading="lazy">
+        <img class="room-img" src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=900&q=80&auto=format&fit=crop" alt="Suite Impériale" loading="lazy">
         <span class="room-badge">Plus populaire</span>
       </div>
       <h3 class="room-name">La Suite Impériale</h3>
-      <div class="room-specs">
-        <span class="room-spec">⊞ 120 m²</span>
-        <span class="room-spec">⊕ Terrasse privée</span>
-        <span class="room-spec">◯ Plunge pool</span>
+      <div class="room-specs"><span class="room-spec">⊞ 120 m²</span><span class="room-spec">⊕ Terrasse privée</span><span class="room-spec">◯ Plunge pool</span></div>
+      <div class="room-footer"><div><div class="room-price">€ 850</div><div class="room-per">par nuit</div></div><a href="#booking" class="btn-sm">Réserver</a></div>
+    </div>
+    <div class="room-card rv rv-up">
+      <div class="room-img-wrap">
+        <img class="room-img" src="https://images.unsplash.com/photo-1455587734955-081b22074882?w=900&q=80&auto=format&fit=crop" alt="Chambre Patio" loading="lazy">
       </div>
-      <div class="room-footer">
-        <div>
-          <div class="room-price">€ 850</div>
-          <div class="room-per">par nuit</div>
-        </div>
-        <a href="#booking" class="btn-sm">Réserver</a>
+      <h3 class="room-name">Chambre du Patio</h3>
+      <div class="room-specs"><span class="room-spec">⊞ 65 m²</span><span class="room-spec">⊕ Vue patio</span><span class="room-spec">◯ Accès cour</span></div>
+      <div class="room-footer"><div><div class="room-price">€ 420</div><div class="room-per">par nuit</div></div><a href="#booking" class="btn-sm">Réserver</a></div>
+    </div>
+    <div class="room-card rv rv-up">
+      <div class="room-img-wrap">
+        <img class="room-img" src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=900&q=80&auto=format&fit=crop" alt="Villa Desert" loading="lazy">
+        <span class="room-badge">Exclusive</span>
       </div>
+      <h3 class="room-name">Villa Désert d'Or</h3>
+      <div class="room-specs"><span class="room-spec">⊞ 200 m²</span><span class="room-spec">⊕ Piscine privée</span><span class="room-spec">◯ Vue désert</span></div>
+      <div class="room-footer"><div><div class="room-price">€ 1 200</div><div class="room-per">par nuit</div></div><a href="#booking" class="btn-sm">Réserver</a></div>
     </div>
-
-```
-<!-- suite 2 -->
-<div class="room-card rv rv-up">
-  <div class="room-img-wrap">
-    <img class="room-img"
-      src="https://images.unsplash.com/photo-1455587734955-081b22074882?w=900&q=80&auto=format&fit=crop"
-      alt="Chambre du Patio" loading="lazy">
-  </div>
-  <h3 class="room-name">Chambre du Patio</h3>
-  <div class="room-specs">
-    <span class="room-spec">⊞ 65 m²</span>
-    <span class="room-spec">⊕ Vue patio</span>
-    <span class="room-spec">◯ Accès cour</span>
-  </div>
-  <div class="room-footer">
-    <div>
-      <div class="room-price">€ 420</div>
-      <div class="room-per">par nuit</div>
+    <div class="room-card rv rv-up">
+      <div class="room-img-wrap">
+        <img class="room-img" src="https://images.unsplash.com/photo-1551882547-ff40c4a49949?w=900&q=80&auto=format&fit=crop" alt="Penthouse" loading="lazy">
+      </div>
+      <h3 class="room-name">Rooftop Penthouse</h3>
+      <div class="room-specs"><span class="room-spec">⊞ 90 m²</span><span class="room-spec">⊕ Terrasse 360°</span><span class="room-spec">◯ Vue panoramique</span></div>
+      <div class="room-footer"><div><div class="room-price">€ 650</div><div class="room-per">par nuit</div></div><a href="#booking" class="btn-sm">Réserver</a></div>
     </div>
-    <a href="#booking" class="btn-sm">Réserver</a>
-  </div>
-</div>
-
-<!-- suite 3 -->
-<div class="room-card rv rv-up">
-  <div class="room-img-wrap">
-    <img class="room-img"
-      src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=900&q=80&auto=format&fit=crop"
-      alt="Villa Désert d'Or" loading="lazy">
-    <span class="room-badge">Exclusive</span>
-  </div>
-  <h3 class="room-name">Villa Désert d'Or</h3>
-  <div class="room-specs">
-    <span class="room-spec">⊞ 200 m²</span>
-    <span class="room-spec">⊕ Piscine privée</span>
-    <span class="room-spec">◯ Vue désert</span>
-  </div>
-  <div class="room-footer">
-    <div>
-      <div class="room-price">€ 1 200</div>
-      <div class="room-per">par nuit</div>
-    </div>
-    <a href="#booking" class="btn-sm">Réserver</a>
-  </div>
-</div>
-
-<!-- suite 4 -->
-<div class="room-card rv rv-up">
-  <div class="room-img-wrap">
-    <img class="room-img"
-      src="https://images.unsplash.com/photo-1551882547-ff40c4a49949?w=900&q=80&auto=format&fit=crop"
-      alt="Rooftop Penthouse" loading="lazy">
-  </div>
-  <h3 class="room-name">Rooftop Penthouse</h3>
-  <div class="room-specs">
-    <span class="room-spec">⊞ 90 m²</span>
-    <span class="room-spec">⊕ Terrasse 360°</span>
-    <span class="room-spec">◯ Vue panoramique</span>
-  </div>
-  <div class="room-footer">
-    <div>
-      <div class="room-price">€ 650</div>
-      <div class="room-per">par nuit</div>
-    </div>
-    <a href="#booking" class="btn-sm">Réserver</a>
-  </div>
-</div>
-```
-
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════
-     GALLERY
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ GALLERY ══════════════ -->
 <section id="gallery">
-  <div class="gallery-head">
+  <div class="gal-head">
     <p class="sec-label rv rv-up">Galerie</p>
     <h2 class="sec-title rv rv-up">Un voyage <em>visuel</em></h2>
   </div>
-
   <div class="gal-grid">
-    <div class="gal-item">
-      <img class="gal-img"
-        src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=1100&q=80&auto=format&fit=crop"
-        alt="Riad" loading="lazy">
-      <div class="gal-overlay"><span class="gal-plus">+</span></div>
-    </div>
-    <div class="gal-item">
-      <img class="gal-img"
-        src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=600&q=80&auto=format&fit=crop"
-        alt="Desert" loading="lazy">
-      <div class="gal-overlay"><span class="gal-plus">+</span></div>
-    </div>
-    <div class="gal-item">
-      <img class="gal-img"
-        src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80&auto=format&fit=crop"
-        alt="Atlas Mountains" loading="lazy">
-      <div class="gal-overlay"><span class="gal-plus">+</span></div>
-    </div>
-    <div class="gal-item">
-      <img class="gal-img"
-        src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80&auto=format&fit=crop"
-        alt="Spa" loading="lazy">
-      <div class="gal-overlay"><span class="gal-plus">+</span></div>
-    </div>
-    <div class="gal-item">
-      <img class="gal-img"
-        src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1100&q=80&auto=format&fit=crop"
-        alt="Pool Villa" loading="lazy">
-      <div class="gal-overlay"><span class="gal-plus">+</span></div>
-    </div>
-    <div class="gal-item">
-      <img class="gal-img"
-        src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80&auto=format&fit=crop"
-        alt="Suite" loading="lazy">
-      <div class="gal-overlay"><span class="gal-plus">+</span></div>
-    </div>
+    <div class="gal-item"><img class="gal-img" src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=1100&q=80&auto=format&fit=crop" loading="lazy"><div class="gal-ov"><span class="gal-plus">+</span></div></div>
+    <div class="gal-item"><img class="gal-img" src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=600&q=80&auto=format&fit=crop" loading="lazy"><div class="gal-ov"><span class="gal-plus">+</span></div></div>
+    <div class="gal-item"><img class="gal-img" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80&auto=format&fit=crop" loading="lazy"><div class="gal-ov"><span class="gal-plus">+</span></div></div>
+    <div class="gal-item"><img class="gal-img" src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80&auto=format&fit=crop" loading="lazy"><div class="gal-ov"><span class="gal-plus">+</span></div></div>
+    <div class="gal-item"><img class="gal-img" src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1100&q=80&auto=format&fit=crop" loading="lazy"><div class="gal-ov"><span class="gal-plus">+</span></div></div>
+    <div class="gal-item"><img class="gal-img" src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80&auto=format&fit=crop" loading="lazy"><div class="gal-ov"><span class="gal-plus">+</span></div></div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════
-     TESTIMONIALS
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ REVIEWS ══════════════ -->
 <section id="reviews">
   <div class="rev-head">
-    <p class="sec-label rv rv-up" style="justify-content:center;">Témoignages</p>
+    <p class="sec-label rv rv-up" style="justify-content:center">Témoignages</p>
     <h2 class="sec-title rv rv-up">La voix de nos <em>hôtes</em></h2>
   </div>
-
   <div class="rev-grid">
     <div class="rev-card rv rv-up">
       <div class="rev-stars">★★★★★</div>
-      <p class="rev-text">« MAISON NOMADE a transformé ce que je pensais être un voyage de luxe. Les lanternes, le silence, les étoiles au-dessus du riad — une pure magie. »</p>
-      <div class="rev-author">
-        <div class="rev-avatar">S</div>
-        <div>
-          <div class="rev-name">Sophie Delacroix</div>
-          <div class="rev-loc">Paris, France</div>
-        </div>
-      </div>
+      <p class="rev-text">« MAISON NOMADE a transformé ce que je pensais être un voyage de luxe. Les lanternes, le silence, les étoiles — une pure magie. »</p>
+      <div class="rev-auth"><div class="rev-av">S</div><div><div class="rev-name">Sophie Delacroix</div><div class="rev-loc">Paris, France</div></div></div>
     </div>
-
-```
-<div class="rev-card rv rv-up">
-  <div class="rev-stars">★★★★★</div>
-  <p class="rev-text">« L'expérience de voyage la plus extraordinaire de ma vie. Chaque détail était pensé — des draps tissés à la main au coucher de soleil privé dans le Sahara. »</p>
-  <div class="rev-author">
-    <div class="rev-avatar">J</div>
-    <div>
-      <div class="rev-name">James Worthington</div>
-      <div class="rev-loc">London, UK</div>
+    <div class="rev-card rv rv-up">
+      <div class="rev-stars">★★★★★</div>
+      <p class="rev-text">« L'expérience la plus extraordinaire de ma vie. Chaque détail était pensé — des draps tissés à la main au coucher de soleil privé. »</p>
+      <div class="rev-auth"><div class="rev-av">J</div><div><div class="rev-name">James Worthington</div><div class="rev-loc">London, UK</div></div></div>
     </div>
-  </div>
-</div>
-
-<div class="rev-card rv rv-up">
-  <div class="rev-stars">★★★★★</div>
-  <p class="rev-text">« Nous avons passé notre lune de miel ici et nous en parlons encore des années après. Cela a redéfini ce que nous pensions possible en matière d'hospitalité. »</p>
-  <div class="rev-author">
-    <div class="rev-avatar">M</div>
-    <div>
-      <div class="rev-name">Mia & Thomas R.</div>
-      <div class="rev-loc">New York, USA</div>
+    <div class="rev-card rv rv-up">
+      <div class="rev-stars">★★★★★</div>
+      <p class="rev-text">« Notre lune de miel ici a redéfini ce que nous pensions possible en matière d'hospitalité. On en parle encore des années après. »</p>
+      <div class="rev-auth"><div class="rev-av">M</div><div><div class="rev-name">Mia & Thomas R.</div><div class="rev-loc">New York, USA</div></div></div>
     </div>
-  </div>
-</div>
-```
-
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════
-     BOOKING
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ BOOKING ══════════════ -->
 <section id="booking">
-  <div class="book-inner">
-    <!-- left: content -->
+  <div class="bk-inner">
     <div>
       <p class="sec-label rv rv-up">Réservations</p>
       <h2 class="sec-title rv rv-up">Commencez<br>votre <em>voyage</em></h2>
-      <p class="book-copy rv rv-up">Notre équipe de conciergerie est dédiée à la création de votre escapade marocaine parfaite. Chaque réservation est le début d'une histoire que nous construirons ensemble.</p>
-      <div class="book-contact rv rv-up">
-        <div>
-          <div class="bc-label">Téléphone</div>
-          <div class="bc-val">+212 5XX XXX XXX</div>
-        </div>
-        <div>
-          <div class="bc-label">Email</div>
-          <div class="bc-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="384a5d4b5d4a4e5d785559514b5756565755595c5d165559">[email&#160;protected]</a></div>
-        </div>
+      <p class="bk-copy rv rv-up">Notre équipe de conciergerie est dédiée à la création de votre escapade marocaine parfaite. Chaque réservation est le début d'une histoire que nous construirons ensemble.</p>
+      <div class="bk-contact rv rv-up">
+        <div><div class="bc-lbl">Téléphone</div><div class="bc-val">+212 5XX XXX XXX</div></div>
+        <div><div class="bc-lbl">Email</div><div class="bc-val">reserve@maisonnomade.ma</div></div>
       </div>
     </div>
-
-```
-<!-- right: form -->
-<form class="bk-form rv rv-rgt" onsubmit="return false;">
-  <div class="f-row">
-    <div class="f-group">
-      <label class="f-label">Prénom</label>
-      <input class="f-input" type="text" placeholder="Jean">
-    </div>
-    <div class="f-group">
-      <label class="f-label">Nom</label>
-      <input class="f-input" type="text" placeholder="Dupont">
-    </div>
-  </div>
-
-  <div class="f-group">
-    <label class="f-label">Adresse e-mail</label>
-    <input class="f-input" type="email" placeholder="jean@exemple.com">
-  </div>
-
-  <div class="f-row">
-    <div class="f-group">
-      <label class="f-label">Arrivée</label>
-      <input class="f-input" type="date">
-    </div>
-    <div class="f-group">
-      <label class="f-label">Départ</label>
-      <input class="f-input" type="date">
-    </div>
-  </div>
-
-  <div class="f-row">
-    <div class="f-group">
-      <label class="f-label">Suite</label>
-      <select class="f-select">
-        <option value="">Choisir une suite</option>
-        <option>La Suite Impériale — €850/nuit</option>
-        <option>Chambre du Patio — €420/nuit</option>
-        <option>Villa Désert d'Or — €1 200/nuit</option>
-        <option>Rooftop Penthouse — €650/nuit</option>
-      </select>
-    </div>
-    <div class="f-group">
-      <label class="f-label">Voyageurs</label>
-      <select class="f-select">
-        <option>1 voyageur</option>
-        <option selected>2 voyageurs</option>
-        <option>3 voyageurs</option>
-        <option>4+ voyageurs</option>
-      </select>
-    </div>
-  </div>
-
-  <button class="btn-submit" type="submit"><span>Demander une réservation</span></button>
-</form>
-```
-
+    <form class="bk-form rv rv-rgt" onsubmit="return false">
+      <div class="f-row">
+        <div class="f-grp"><label class="f-lbl">Prénom</label><input class="f-inp" type="text" placeholder="Jean"></div>
+        <div class="f-grp"><label class="f-lbl">Nom</label><input class="f-inp" type="text" placeholder="Dupont"></div>
+      </div>
+      <div class="f-grp"><label class="f-lbl">Email</label><input class="f-inp" type="email" placeholder="jean@exemple.com"></div>
+      <div class="f-row">
+        <div class="f-grp"><label class="f-lbl">Arrivée</label><input class="f-inp" type="date"></div>
+        <div class="f-grp"><label class="f-lbl">Départ</label><input class="f-inp" type="date"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-grp"><label class="f-lbl">Suite</label>
+          <select class="f-sel"><option value="">Choisir une suite</option><option>Suite Impériale — €850/nuit</option><option>Chambre du Patio — €420/nuit</option><option>Villa Désert d'Or — €1200/nuit</option><option>Rooftop Penthouse — €650/nuit</option></select>
+        </div>
+        <div class="f-grp"><label class="f-lbl">Voyageurs</label>
+          <select class="f-sel"><option>1 voyageur</option><option selected>2 voyageurs</option><option>3 voyageurs</option><option>4+ voyageurs</option></select>
+        </div>
+      </div>
+      <button class="btn-sub"><span>Demander une réservation</span></button>
+    </form>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════
-     FOOTER
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════ FOOTER ══════════════ -->
 <footer>
   <div class="ft-grid">
     <div>
       <a href="#" class="ft-logo">Maison Nomade</a>
-      <p class="ft-desc">Une collection intime de riads de luxe et de retraites désertiques à travers le Maroc. Chaque détail est une déclaration d'amour à l'art du voyage.</p>
-      <div class="ft-socials">
-        <a href="#" class="ft-soc" aria-label="Instagram">ig</a>
-        <a href="#" class="ft-soc" aria-label="Facebook">fb</a>
-        <a href="#" class="ft-soc" aria-label="LinkedIn">in</a>
-        <a href="#" class="ft-soc" aria-label="Pinterest">pi</a>
+      <p class="ft-desc">Une collection intime de riads de luxe et de retraites désertiques à travers le Maroc. Chaque détail, une déclaration d'amour à l'art du voyage.</p>
+      <div class="ft-socs">
+        <a href="#" class="ft-soc">ig</a><a href="#" class="ft-soc">fb</a><a href="#" class="ft-soc">in</a><a href="#" class="ft-soc">pi</a>
       </div>
     </div>
-
-```
-<div>
-  <div class="ft-col-title">Propriétés</div>
-  <ul class="ft-links">
-    <li><a href="#">Riad Nomade Marrakech</a></li>
-    <li><a href="#">Dar Nomade Fès</a></li>
-    <li><a href="#">Villa Nomade Essaouira</a></li>
-    <li><a href="#">Camp Nomade Sahara</a></li>
-  </ul>
-</div>
-
-<div>
-  <div class="ft-col-title">Expériences</div>
-  <ul class="ft-links">
-    <li><a href="#">Voyages désertiques</a></li>
-    <li><a href="#">Rituels hammam</a></li>
-    <li><a href="#">Arts culinaires</a></li>
-    <li><a href="#">Treks Atlas</a></li>
-    <li><a href="#">Événements privés</a></li>
-  </ul>
-</div>
-
-<div>
-  <div class="ft-col-title">Société</div>
-  <ul class="ft-links">
-    <li><a href="#">À propos</a></li>
-    <li><a href="#">Durabilité</a></li>
-    <li><a href="#">Presse</a></li>
-    <li><a href="#">Carrières</a></li>
-    <li><a href="#">Contact</a></li>
-  </ul>
-</div>
-```
-
-  </div>
-
-  <div class="ft-bottom">
-    <div class="ft-copy">© 2024 MAISON NOMADE. Tous droits réservés.</div>
-    <div class="ft-legal">
-      <a href="#">Confidentialité</a>
-      <a href="#">Mentions légales</a>
-      <a href="#">Cookies</a>
+    <div>
+      <div class="ft-ctitle">Propriétés</div>
+      <ul class="ft-links"><li><a href="#">Riad Nomade Marrakech</a></li><li><a href="#">Dar Nomade Fès</a></li><li><a href="#">Villa Nomade Essaouira</a></li><li><a href="#">Camp Nomade Sahara</a></li></ul>
     </div>
+    <div>
+      <div class="ft-ctitle">Expériences</div>
+      <ul class="ft-links"><li><a href="#">Voyages désertiques</a></li><li><a href="#">Rituels hammam</a></li><li><a href="#">Arts culinaires</a></li><li><a href="#">Treks Atlas</a></li><li><a href="#">Événements privés</a></li></ul>
+    </div>
+    <div>
+      <div class="ft-ctitle">Société</div>
+      <ul class="ft-links"><li><a href="#">À propos</a></li><li><a href="#">Durabilité</a></li><li><a href="#">Presse</a></li><li><a href="#">Carrières</a></li><li><a href="#">Contact</a></li></ul>
+    </div>
+  </div>
+  <div class="ft-bot">
+    <div class="ft-copy">© 2024 MAISON NOMADE. Tous droits réservés.</div>
+    <div class="ft-leg"><a href="#">Confidentialité</a><a href="#">Mentions légales</a><a href="#">Cookies</a></div>
   </div>
 </footer>
 
-<!-- ══════════════════════════════════════════════════════
-     THREE.JS + ALL INTERACTIONS  (ES Module)
-══════════════════════════════════════════════════════ -->
-
+<!-- ══════════════════════════════════════════════════════════════
+     THREE.JS — PROCEDURAL AIRPLANE + FULL 3D SCENE
+══════════════════════════════════════════════════════════════════ -->
 <script type="module">
-  /* ── imports (must be top-level in ES modules — cannot be inside try/catch) ── */
-  import * as THREE from 'https://esm.sh/three@0.160.0';
-  import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader';
+import * as THREE from 'https://esm.sh/three@0.160.0';
 
-  /* Explicit global refs — avoids Safari ReferenceError in strict module scope */
-  const gsap          = window.gsap;
-  const ScrollTrigger = window.ScrollTrigger;
-  gsap.registerPlugin(ScrollTrigger);
+const gsap = window.gsap;
+const ScrollTrigger = window.ScrollTrigger;
+gsap.registerPlugin(ScrollTrigger);
 
-try {
+/* ─────────────────────────────────────────────────
+   RENDERER SETUP
+───────────────────────────────────────────────── */
+const canvas = document.getElementById('c3d');
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
 
-  /* ──────────────────────────────────────────────────
-     ① THREE.JS SCENE
-  ────────────────────────────────────────────────── */
-  const canvas   = document.getElementById('c3d');
-  const W = () => canvas.clientWidth;
-  const H = () => canvas.clientHeight;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setSize(W(), H());
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.autoClear = false;  // we manually clear for dual-scene sky
 
-  /* Scene */
-  const scene = new THREE.Scene();
+/* ─────────────────────────────────────────────────
+   SKY — ShaderMaterial gradient background
+   Night sky → dawn transition driven by uDawn [0..1]
+───────────────────────────────────────────────── */
+const skyScene  = new THREE.Scene();
+const skyCam    = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const skyU      = { uDawn: { value: 0.0 } };
 
-  /* Fog — adds mystery depth */
-  scene.fog = new THREE.FogExp2(0x050403, 0.14);
+skyScene.add(new THREE.Mesh(
+  new THREE.PlaneGeometry(2, 2),
+  new THREE.ShaderMaterial({
+    uniforms: skyU,
+    vertexShader: `
+      varying vec2 vUv;
+      void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }
+    `,
+    fragmentShader: `
+      uniform float uDawn;
+      varying vec2 vUv;
+      void main(){
+        // Night colours
+        vec3 nTop = vec3(0.008, 0.008, 0.055);
+        vec3 nMid = vec3(0.020, 0.012, 0.090);
+        vec3 nHor = vec3(0.100, 0.040, 0.015);
+        // Dawn colours
+        vec3 dTop = vec3(0.030, 0.075, 0.210);
+        vec3 dMid = vec3(0.520, 0.170, 0.040);
+        vec3 dHor = vec3(0.920, 0.480, 0.080);
 
-  /* Camera — use window dimensions; canvas.clientWidth can be 0 at module init */
-  const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 80);
-  camera.position.set(1.8, 0.2, 5.5);
+        float y = vUv.y;
+        vec3 top = mix(nTop, dTop, uDawn);
+        vec3 mid = mix(nMid, dMid, uDawn);
+        vec3 hor = mix(nHor, dHor, uDawn);
 
-  /* Renderer */
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias : true,
-    alpha     : true,
-    powerPreference: 'high-performance'
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.toneMapping         = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.6;
-  renderer.outputColorSpace    = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled   = true;
-  renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
+        vec3 col = y > 0.55
+          ? mix(mid, top, (y - 0.55) / 0.45)
+          : mix(hor, mid, y / 0.55);
 
-  /* ── Lights ───────────────────────────────────────── */
-  /* Ambient — very warm, dim */
-  const ambient = new THREE.AmbientLight(0x1a1008, 1.5);
-  scene.add(ambient);
+        // Horizon sun glow
+        float glow = pow(max(0., 1. - abs(y - 0.12) * 8.), 3.) * uDawn * 0.6;
+        col += vec3(1.0, 0.5, 0.1) * glow;
 
-  /* Key light — warm gold */
-  const keyLight = new THREE.PointLight(0xC8A97E, 12, 25);
-  keyLight.position.set(3, 3, 4);
-  keyLight.castShadow = true;
-  scene.add(keyLight);
-
-  /* Fill light — orange-warm */
-  const fillLight = new THREE.PointLight(0xFF8C42, 5, 18);
-  fillLight.position.set(-3, -1, 3);
-  scene.add(fillLight);
-
-  /* Rim light — cool accent */
-  const rimLight = new THREE.DirectionalLight(0xBFA06A, 1.2);
-  rimLight.position.set(0, 6, -4);
-  scene.add(rimLight);
-
-  /* ── Particle Field ────────────────────────────────── */
-  {
-    const geo  = new THREE.BufferGeometry();
-    const N    = 2200;
-    const pos  = new Float32Array(N * 3);
-    const sizes = new Float32Array(N);
-
-    for (let i = 0; i < N; i++) {
-      pos[i*3]   = (Math.random() - 0.5) * 32;
-      pos[i*3+1] = (Math.random() - 0.5) * 32;
-      pos[i*3+2] = (Math.random() - 0.5) * 32;
-      sizes[i]   = Math.random() * 0.015 + 0.005;
-    }
-
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
-
-    const mat = new THREE.PointsMaterial({
-      color       : 0xC8A97E,
-      size        : 0.018,
-      transparent : true,
-      opacity     : 0.35,
-      sizeAttenuation: true,
-      depthWrite  : false,
-    });
-
-    const stars = new THREE.Points(geo, mat);
-    scene.add(stars);
-
-    /* slow rotation in RAF below */
-    scene._stars = stars;
-  }
-
-  /* ── GLB Model ─────────────────────────────────────── */
-  /*
-   * We load the official Khronos Group Lantern model.
-   * This is a detailed metallic & glass ornate lantern — perfect
-   * for a Moroccan luxury brand.
-   * Source: https://github.com/KhronosGroup/glTF-Sample-Models
-   */
-  const MODEL_URL =
-    'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@main' +
-    '/2.0/Lantern/glTF-Binary/Lantern.glb';
-
-  let mesh3d        = null;  /* the loaded/fallback model */
-  let baseScale     = 1;
-  let modelLoaded   = false;
-  let autoRotTween  = null;  /* GSAP auto-rotation */
-
-  const loader = new GLTFLoader();
-
-  function onModelReady(group, scale) {
-    mesh3d     = group;
-    baseScale  = scale;
-    modelLoaded = true;
-    scene.add(mesh3d);
-
-    /* Animate in — elastic pop */
-    gsap.from(mesh3d.scale, {
-      x: 0.001, y: 0.001, z: 0.001,
-      duration: 2.2,
-      ease: 'elastic.out(1, 0.42)',
-      delay: 0.2
-    });
-
-    /* Continuous gentle auto-rotation — GSAP owns .rotation.y */
-    autoRotTween = gsap.to(mesh3d.rotation, {
-      y    : '+=' + (Math.PI * 2),
-      duration: 22,
-      repeat  : -1,
-      ease    : 'none',
-    });
-
-    /* Scroll: move down + slightly shrink as hero exits */
-    gsap.timeline({
-      scrollTrigger: {
-        trigger : '#hero',
-        start   : 'top top',
-        end     : 'bottom top',
-        scrub   : 1.8
+        gl_FragColor = vec4(col, 1.0);
       }
-    })
-    .to(mesh3d.position, { y: -2.2, ease: 'none' }, 0)
-    .to(mesh3d.scale,    {
-      x: baseScale * 0.4,
-      y: baseScale * 0.4,
-      z: baseScale * 0.4,
-      ease: 'none'
-    }, 0)
-    .to(camera.position, { z: 7.5, ease: 'none' }, 0);
+    `,
+    depthWrite: false,
+    depthTest:  false,
+  })
+));
 
-    hideLoader();
+/* ─────────────────────────────────────────────────
+   MAIN 3D SCENE
+───────────────────────────────────────────────── */
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(52, W() / H(), 0.05, 500);
+camera.position.set(0, 1.5, 12);
+
+/* ── Fog ── */
+scene.fog = new THREE.FogExp2(0x060408, 0.018);
+
+/* ── Lights ── */
+scene.add(new THREE.AmbientLight(0x334477, 1.4));
+
+const sunLight = new THREE.DirectionalLight(0xFFDDAA, 2.2);
+sunLight.position.set(10, 10, -8);
+sunLight.castShadow = true;
+sunLight.shadow.camera.left = sunLight.shadow.camera.bottom = -30;
+sunLight.shadow.camera.right = sunLight.shadow.camera.top = 30;
+sunLight.shadow.camera.far = 100;
+scene.add(sunLight);
+
+scene.add(new THREE.HemisphereLight(0x223366, 0xAA7733, 0.8));
+
+const moonGlow = new THREE.PointLight(0xAABBFF, 0.6, 60);
+moonGlow.position.set(15, 18, -30);
+scene.add(moonGlow);
+
+/* ── Stars ── */
+{
+  const N = 4000;
+  const pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1);
+    const r     = 90 + Math.random() * 30;
+    pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    pos[i*3+1] = Math.abs(r * Math.cos(phi)) + 2;
+    pos[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
   }
-
-  loader.load(
-    MODEL_URL,
-    (gltf) => {
-      const group = gltf.scene;
-
-      /* Center & normalise scale */
-      const box    = new THREE.Box3().setFromObject(group);
-      const center = box.getCenter(new THREE.Vector3());
-      const size   = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-
-      group.position.sub(center);
-      const s = 2.6 / maxDim;
-      group.scale.setScalar(s);
-
-      /* Slight right-side offset so model doesn't cover the text */
-      group.position.x = 1.5;
-
-      /* Enhance material quality on each mesh */
-      group.traverse(child => {
-        if (!child.isMesh) return;
-        child.castShadow    = true;
-        child.receiveShadow = true;
-        if (child.material) {
-          /* Boost metalness & reflectivity for premium look */
-          if (child.material.metalness !== undefined) {
-            child.material.metalness = Math.max(child.material.metalness, 0.55);
-            child.material.roughness = Math.min(child.material.roughness, 0.45);
-          }
-          child.material.needsUpdate = true;
-        }
-      });
-
-      onModelReady(group, s);
-    },
-    /* progress */
-    (xhr) => {
-      if (xhr.total > 0) {
-        const pct = (xhr.loaded / xhr.total) * 100;
-        document.getElementById('ldr-fill').style.width = pct + '%';
-      }
-    },
-    /* error — build beautiful fallback */
-    (err) => {
-      console.warn('GLB load failed — using procedural fallback:', err);
-
-      /* ─── Fallback: Ornate ring-lantern structure ─── */
-      const group = new THREE.Group();
-
-      /* Vertical chain */
-      const chainMat = new THREE.MeshPhongMaterial({
-        color: 0xBFA06A, specular: 0xFFD700, shininess: 180,
-        emissive: 0x2D1A08
-      });
-      for (let i = 0; i < 6; i++) {
-        const t = new THREE.TorusGeometry(0.06, 0.018, 8, 20);
-        const m = new THREE.Mesh(t, chainMat);
-        m.position.y = 1.4 + i * 0.12;
-        m.rotation.x = (i % 2 === 0) ? 0 : Math.PI * 0.5;
-        group.add(m);
-      }
-
-      /* Rings around a central axis */
-      const ringMat = new THREE.MeshPhongMaterial({
-        color: 0xC8A97E, specular: 0xFFE066, shininess: 200,
-        emissive: 0x1A0F04,
-        wireframe: false
-      });
-      const ringSizes = [0.55, 0.70, 0.80, 0.70, 0.55];
-      const tubeRad   = [0.014, 0.01, 0.014, 0.01, 0.014];
-      ringSizes.forEach((r, i) => {
-        const geo  = new THREE.TorusGeometry(r, tubeRad[i], 12, 80);
-        const mesh = new THREE.Mesh(geo, ringMat);
-        mesh.position.y = -0.6 + i * 0.3;
-        group.add(mesh);
-      });
-
-      /* Decorative arced spines */
-      for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        const geo = new THREE.CylinderGeometry(0.008, 0.008, 1.2, 8);
-        const m   = new THREE.Mesh(geo, chainMat);
-        m.position.set(Math.cos(angle) * 0.72, 0, Math.sin(angle) * 0.72);
-        m.rotation.z = Math.PI * 0.5 - 0.35;
-        m.rotation.y = angle;
-        group.add(m);
-      }
-
-      /* Central gem */
-      const gemGeo = new THREE.OctahedronGeometry(0.18, 1);
-      const gemMat = new THREE.MeshPhongMaterial({
-        color: 0xC8A97E, specular: 0xFFFFAA, shininess: 300,
-        emissive: 0x4D320A, transparent: true, opacity: 0.92
-      });
-      const gem = new THREE.Mesh(gemGeo, gemMat);
-      group.add(gem);
-
-      group.position.x = 1.5;
-      const s = 1;
-      group.scale.setScalar(s);
-
-      onModelReady(group, s);
-      document.getElementById('ldr-fill').style.width = '100%';
-    }
-  );
-
-  /* ── Render loop ─────────────────────────────────── */
-  const clock = new THREE.Clock();
-
-  function tick() {
-    requestAnimationFrame(tick);
-
-    const t = clock.getElapsedTime();
-
-    /* Stars drift */
-    if (scene._stars) {
-      scene._stars.rotation.y = t * 0.018;
-      scene._stars.rotation.x = t * 0.009;
-    }
-
-    /* Pulsing warm key light */
-    keyLight.intensity = 12 + Math.sin(t * 1.6) * 2.5;
-
-    /* Key light orbits model slowly */
-    keyLight.position.x = 3 + Math.cos(t * 0.45) * 0.8;
-    keyLight.position.z = 4 + Math.sin(t * 0.45) * 0.8;
-
-    /* Gentle float of model — handled via GSAP to avoid ScrollTrigger conflict */
-    /* (RAF no longer touches position.y — GSAP owns it) */
-
-    renderer.render(scene, camera);
-  }
-  tick();
-
-  /* ── Resize ──────────────────────────────────────── */
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-
-  /* ── Mouse parallax on hero camera ──────────────── */
-  document.addEventListener('mousemove', e => {
-    const nx = (e.clientX / window.innerWidth  - 0.5) * 2;
-    const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-
-    gsap.to(camera.position, {
-      x: 1.8 + nx * 0.35,
-      y: 0.2 - ny * 0.2,
-      duration: 1.8,
-      ease: 'power2.out',
-      overwrite: 'auto'
-    });
-  });
-
-  /* ──────────────────────────────────────────────────
-     ② LOADING → HIDE
-  ────────────────────────────────────────────────── */
-  let loaderHidden = false;
-
-  function hideLoader() {
-    if (loaderHidden) return;
-    loaderHidden = true;
-
-    gsap.to('#loader', {
-      opacity  : 0,
-      duration : 1.1,
-      delay    : 0.4,
-      ease     : 'power2.inOut',
-      onComplete() {
-        document.getElementById('loader').style.display = 'none';
-        runHeroIntro();
-      }
-    });
-  }
-
-  /* Safety: hide loader after 5s even if model is slow */
-  setTimeout(() => {
-    document.getElementById('ldr-fill').style.width = '100%';
-    hideLoader();
-  }, 5000);
-
-  /* ──────────────────────────────────────────────────
-     ③ HERO INTRO ANIMATION
-  ────────────────────────────────────────────────── */
-  function runHeroIntro() {
-    const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-
-    tl.to('.hero-eyebrow', { opacity:1, y:0, duration:.9 })
-      .to('.h1-line',  { opacity:1, y:'0%', duration:1.05, stagger:.14 }, '-=.5')
-      .to('.hero-body', { opacity:1, y:0, duration:.85 }, '-=.45')
-      .to('.hero-btns', { opacity:1, y:0, duration:.8  }, '-=.4')
-      .to('.hero-scroll',{ opacity:1, duration:.8       }, '-=.2');
-  }
-
-  /* ──────────────────────────────────────────────────
-     ④ SCROLL ANIMATIONS
-  ────────────────────────────────────────────────── */
-
-  /* Navbar sticky */
-  ScrollTrigger.create({
-    start: 'top -60',
-    onUpdate(self) {
-      document.getElementById('nav')
-        .classList.toggle('stuck', self.scroll() > 60);
-    }
-  });
-
-  /* Generic reveal — all .rv elements */
-  gsap.utils.toArray('.rv').forEach(el => {
-    const isUp  = el.classList.contains('rv-up');
-    const isLft = el.classList.contains('rv-lft');
-    const isRgt = el.classList.contains('rv-rgt');
-
-    const props = { opacity:1, duration:1.05, ease:'power3.out' };
-    if (isUp)  props.y = 0;
-    if (isLft) props.x = 0;
-    if (isRgt) props.x = 0;
-
-    gsap.to(el, {
-      ...props,
-      scrollTrigger: {
-        trigger: el,
-        start  : 'top 86%',
-        toggleActions: 'play none none none'
-      }
-    });
-  });
-
-  /* Staggered cards */
-  function staggerCards(selector, parentTrigger) {
-    const cards = gsap.utils.toArray(selector);
-    cards.forEach((card, i) => {
-      gsap.from(card, {
-        opacity: 0, y: 60,
-        duration: .9, delay: i * 0.13,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: parentTrigger,
-          start  : 'top 74%'
-        }
-      });
-    });
-  }
-
-  staggerCards('.exp-card',  '#experiences');
-  staggerCards('.room-card', '#rooms');
-  staggerCards('.rev-card',  '#reviews');
-  staggerCards('.gal-item',  '#gallery');
-
-  /* About image parallax */
-  gsap.to('.about-img', {
-    yPercent : -14,
-    ease     : 'none',
-    scrollTrigger: {
-      trigger: '#about',
-      start  : 'top bottom',
-      end    : 'bottom top',
-      scrub  : true
-    }
-  });
-
-  /* Counter animation on stats */
-  document.querySelectorAll('.stat-num').forEach(el => {
-    const target = +el.dataset.target;
-    const suffix = el.dataset.target.toString().includes('K') ? 'K+' : '+';
-
-    ScrollTrigger.create({
-      trigger: el,
-      start  : 'top 80%',
-      onEnter() {
-        const obj = { val: 0 };
-        gsap.to(obj, {
-          val: target, duration: 2.2, ease: 'power2.out',
-          onUpdate() {
-            el.textContent = Math.round(obj.val) + suffix;
-          }
-        });
-      }
-    });
-  });
-
-  /* ──────────────────────────────────────────────────
-     ⑤ CUSTOM CURSOR
-  ────────────────────────────────────────────────── */
-  const dot  = document.getElementById('cur-dot');
-  const ring = document.getElementById('cur-ring');
-
-  let mx = 0, my = 0;
-  let rx = 0, ry = 0;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    gsap.to(dot, { x: mx, y: my, duration:.08 });
-  });
-
-  (function followRing() {
-    rx += (mx - rx) * 0.11;
-    ry += (my - ry) * 0.11;
-    gsap.set(ring, { x: rx, y: ry });
-    requestAnimationFrame(followRing);
-  })();
-
-  const hoverEls = document.querySelectorAll(
-    'a, button, .exp-card, .room-card, .gal-item, .rev-card'
-  );
-  hoverEls.forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('cur-hover'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('cur-hover'));
-  });
-
-  /* Hide cursor on mobile */
-  if ('ontouchstart' in window) {
-    dot.style.display  = 'none';
-    ring.style.display = 'none';
-    document.body.style.cursor = 'auto';
-  }
-
-} catch (err) {
-  /* Emergency: any uncaught error hides loader so site isn't blocked */
-  console.error('[MAISON NOMADE] Critical module error:', err);
-  const ldr = document.getElementById('loader');
-  if (ldr) ldr.style.display = 'none';
-  const _gsap = window.gsap;
-  if (_gsap) {
-    _gsap.to(
-      '.hero-eyebrow,.h1-line,.hero-body,.hero-btns,.hero-scroll',
-      { opacity:1, y:0, duration:.9, stagger:.1, ease:'power3.out' }
-    );
-  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const stars = new THREE.Points(geo, new THREE.PointsMaterial({
+    color: 0xDDCCBB, size: 0.22, transparent: true, opacity: 0.85, sizeAttenuation: true
+  }));
+  scene.add(stars);
+  scene._stars = stars;
 }
 
+/* ── Moon disc ── */
+{
+  const moonMat = new THREE.MeshStandardMaterial({
+    color: 0xEEDDAA, emissive: 0xBBAA77, emissiveIntensity: 0.5, roughness: 0.9
+  });
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(1.6, 24, 24), moonMat);
+  moon.position.set(14, 16, -35);
+  scene.add(moon);
+}
+
+/* ── Desert floor ── */
+{
+  const geo = new THREE.PlaneGeometry(300, 300, 64, 64);
+  const pos = geo.attributes.position.array;
+  for (let i = 0; i < pos.length; i += 3) {
+    const x = pos[i], z = pos[i + 2];
+    pos[i+1] = Math.sin(x * 0.07) * 1.4
+             + Math.sin(z * 0.05) * 1.0
+             + Math.sin(x * 0.22 + z * 0.16) * 0.5
+             + (Math.random() - 0.5) * 0.15;
+  }
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshStandardMaterial({ color: 0xB5854A, roughness: 0.96, metalness: 0 });
+  const floor = new THREE.Mesh(geo, mat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -6;
+  floor.receiveShadow = true;
+  scene.add(floor);
+}
+
+/* ── Clouds ── */
+function buildCloud(x, y, z, sc) {
+  const g   = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xEEEEFF, transparent: true, opacity: 0.78, roughness: 1, metalness: 0
+  });
+  const puffs = [
+    [0, 0, 0, 1.0], [1.0, 0.18, 0, 0.85], [-0.9, 0.12, 0, 0.80],
+    [0.4, 0.42, 0, 0.68], [-0.35, 0.38, 0.2, 0.60],
+    [1.3, -0.05, -0.25, 0.58], [-1.15, -0.06, 0.2, 0.54],
+  ];
+  puffs.forEach(([px, py, pz, ps]) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.58 * ps, 7, 5), mat.clone());
+    m.position.set(px, py, pz);
+    g.add(m);
+  });
+  g.position.set(x, y, z);
+  g.scale.setScalar(sc);
+  return g;
+}
+const clouds = [];
+[
+  [-5.5, 3.2, -9,  2.2], [4.5, 3.8, -15, 1.9], [-8, 2.6, -22, 2.7],
+  [7,   3.0, -7,  1.7], [1.5, 4.2, -30, 3.0], [10, 2.2, -13, 2.0],
+  [-4,  3.6, -38, 3.2], [8,  2.8, -45, 2.4],
+].forEach(([x,y,z,s]) => {
+  const c = buildCloud(x, y, z, s);
+  scene.add(c);
+  clouds.push(c);
+});
+
+/* ═══════════════════════════════════════════════════════
+   AIRPLANE — 100% procedural geometry, zero external files
+═══════════════════════════════════════════════════════ */
+function buildAirplane() {
+  const root = new THREE.Group();
+
+  /* shared materials */
+  const mBody = new THREE.MeshStandardMaterial({ color: 0xF0EDE6, metalness: 0.28, roughness: 0.42 });
+  const mGold = new THREE.MeshStandardMaterial({ color: 0xBFA06A, metalness: 0.82, roughness: 0.15, emissive: 0x2C1600, emissiveIntensity: 0.18 });
+  const mDark = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.62, roughness: 0.38 });
+  const mGlass= new THREE.MeshStandardMaterial({ color: 0x78B0D4, transparent: true, opacity: 0.65, roughness: 0.06, metalness: 0.02 });
+  const mEng  = new THREE.MeshStandardMaterial({ color: 0x6A6A6A, metalness: 0.75, roughness: 0.28 });
+  const mFan  = new THREE.MeshStandardMaterial({ color: 0x182A3C, emissive: 0x0A1E44, emissiveIntensity: 0.8, metalness: 0.85, roughness: 0.15 });
+
+  const HP = Math.PI / 2;
+
+  /* helper — build and add mesh */
+  function M(geo, mat, px=0,py=0,pz=0, rx=0,ry=0,rz=0, sx=1,sy=1,sz=1) {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(px, py, pz);
+    m.rotation.set(rx, ry, rz);
+    m.scale.set(sx, sy, sz);
+    m.castShadow = true;
+    root.add(m);
+    return m;
+  }
+
+  /* ── FUSELAGE ── */
+  M(new THREE.CylinderGeometry(0.225, 0.215, 4.8, 32), mBody, 0,0,0, 0,0,HP);
+  /* Nose cone */
+  M(new THREE.ConeGeometry(0.225, 1.0, 32), mBody, 2.9,0,0, 0,0,-HP);
+  /* Tail taper */
+  M(new THREE.CylinderGeometry(0.215, 0.04, 1.8, 20), mBody, -3.3,0,0, 0,0,HP);
+
+  /* ── GOLD LIVERY STRIPE (partial arc) ── */
+  M(new THREE.CylinderGeometry(0.228, 0.218, 4.8, 32, 1, true, -0.14, 0.52), mGold, 0,0,0, 0,0,HP);
+
+  /* ── WINGS (custom swept & tapered geometry) ── */
+  function makeWing(side) {
+    const s = side; // +1 left, -1 right
+    const buf = new THREE.BufferGeometry();
+    /* 8 vertices: top face (0-3) + bottom face (4-7)
+       root-LE, root-TE, tip-LE, tip-TE */
+    const verts = new Float32Array([
+       0.60,  0.045, s * 0.02,    // 0 root LE top
+      -0.12,  0.045, s * 0.02,    // 1 root TE top
+       0.07,  0.045, s * 3.05,    // 2 tip  LE top
+      -0.46,  0.045, s * 3.05,    // 3 tip  TE top
+       0.60, -0.045, s * 0.02,    // 4 root LE bot
+      -0.12, -0.045, s * 0.02,    // 5 root TE bot
+       0.07, -0.045, s * 3.05,    // 6 tip  LE bot
+      -0.46, -0.045, s * 3.05,    // 7 tip  TE bot
+    ]);
+    buf.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+    buf.setIndex([
+      0,2,1, 1,2,3,   // top face
+      4,5,6, 5,7,6,   // bottom face
+      0,4,2, 2,4,6,   // LE edge
+      1,3,5, 3,7,5,   // TE edge
+      0,1,4, 1,5,4,   // root cap
+      2,6,3, 3,6,7,   // tip cap
+    ]);
+    buf.computeVertexNormals();
+    const wm = new THREE.Mesh(buf, mBody);
+    wm.position.set(-0.06, -0.065, 0);
+    wm.castShadow = true;
+    root.add(wm);
+    /* Winglet */
+    M(new THREE.BoxGeometry(0.05, 0.24, 0.08), mBody, -0.06, -0.065 + 0.12, s * 3.08, 0, 0, s * 0.28);
+  }
+  makeWing( 1);
+  makeWing(-1);
+
+  /* ── HORIZONTAL STABILIZERS ── */
+  function makeHStab(side) {
+    const s = side;
+    const buf = new THREE.BufferGeometry();
+    const v = new Float32Array([
+       0.18,  0.022, s*.015, -0.07,  0.022, s*.015,  0.02,  0.022, s*1.28, -0.22,  0.022, s*1.28,
+       0.18, -0.022, s*.015, -0.07, -0.022, s*.015,  0.02, -0.022, s*1.28, -0.22, -0.022, s*1.28,
+    ]);
+    buf.setAttribute('position', new THREE.BufferAttribute(v, 3));
+    buf.setIndex([0,2,1,1,2,3, 4,5,6,5,7,6, 0,4,2,2,4,6, 1,3,5,3,7,5, 0,1,4,1,5,4, 2,6,3,3,6,7]);
+    buf.computeVertexNormals();
+    const m = new THREE.Mesh(buf, mBody);
+    m.position.set(-3.55, 0.10, 0);
+    m.castShadow = true;
+    root.add(m);
+  }
+  makeHStab( 1);
+  makeHStab(-1);
+
+  /* ── VERTICAL FIN ── */
+  {
+    const buf = new THREE.BufferGeometry();
+    const v = new Float32Array([
+       0.25, 0,  0.028, -0.12, 0,  0.028, -0.09, 0.88, 0.028,  0.02, 0.94, 0.028,
+       0.25, 0, -0.028, -0.12, 0, -0.028, -0.09, 0.88,-0.028,  0.02, 0.94,-0.028,
+    ]);
+    buf.setAttribute('position', new THREE.BufferAttribute(v, 3));
+    buf.setIndex([0,1,2,0,2,3, 4,6,5,4,7,6, 0,4,1,1,4,5, 2,6,3,3,6,7, 0,3,4,3,7,4, 1,5,2,2,5,6]);
+    buf.computeVertexNormals();
+    const vm = new THREE.Mesh(buf, mBody);
+    vm.position.set(-3.42, 0.22, 0);
+    vm.castShadow = true;
+    root.add(vm);
+  }
+
+  /* ── ENGINES (2) ── */
+  const engLights = [];
+  [-1, 1].forEach(side => {
+    const ez = side * 1.15;
+    /* nacelle */
+    M(new THREE.CylinderGeometry(0.138, 0.118, 0.88, 20), mEng, 0.30, -0.34, ez, 0,0,HP);
+    /* intake ring */
+    M(new THREE.TorusGeometry(0.140, 0.016, 8, 24), mDark, 0.76, -0.34, ez, 0,HP,0);
+    /* exhaust */
+    M(new THREE.CylinderGeometry(0.092, 0.125, 0.22, 16), mEng, -0.12, -0.34, ez, 0,0,HP);
+    /* fan face (glowing) */
+    M(new THREE.CircleGeometry(0.112, 16), mFan, 0.75, -0.34, ez, 0, HP, 0);
+    /* pylon */
+    M(new THREE.BoxGeometry(0.085, 0.24, 0.08), mBody, 0.22, -0.18, ez);
+    /* glow light inside engine */
+    const gl = new THREE.PointLight(0x4488FF, 1.4, 4.0);
+    gl.position.set(0.76, -0.34, ez * 0.75);
+    root.add(gl);
+    engLights.push(gl);
+  });
+
+  /* ── NAVIGATION LIGHTS ── */
+  /* Red port, Green starboard (wingtip) */
+  const portLight = new THREE.PointLight(0xFF2222, 0.5, 2);
+  portLight.position.set(-0.06, -0.065, 3.05);
+  root.add(portLight);
+  const starLight = new THREE.PointLight(0x22FF22, 0.5, 2);
+  starLight.position.set(-0.06, -0.065, -3.05);
+  root.add(starLight);
+  /* White nose beacon */
+  const noseBeacon = new THREE.PointLight(0xFFFFCC, 0.8, 5);
+  noseBeacon.position.set(3.8, 0, 0);
+  root.add(noseBeacon);
+
+  /* ── WINDOWS row ── */
+  for (let i = 0; i < 12; i++) {
+    M(new THREE.CylinderGeometry(0.055, 0.055, 0.022, 10), mGlass, 2.0 - i * 0.35, 0.218, 0, 0,0,HP);
+  }
+
+  /* ── COCKPIT glazing ── */
+  M(new THREE.SphereGeometry(0.105, 14, 10), mGlass, 2.52,  0.08,  0.00, 0,0,0, 1.0, 0.55, 0.82);
+  M(new THREE.SphereGeometry(0.085, 14, 10), mGlass, 2.38,  0.09,  0.14, 0,0,0, 1.0, 0.52, 0.72);
+  M(new THREE.SphereGeometry(0.085, 14, 10), mGlass, 2.38,  0.09, -0.14, 0,0,0, 1.0, 0.52, 0.72);
+
+  /* scale the whole thing down a bit */
+  root.scale.setScalar(0.78);
+
+  return { group: root, engLights, noseBeacon };
+}
+
+const plane = buildAirplane();
+/* Start: far away top-right, angled toward scene */
+plane.group.position.set(14, 4.5, 22);
+plane.group.rotation.y = -0.55;
+scene.add(plane.group);
+
+/* ── Contrail (particle trail behind engines) ── */
+const TRAIL_LEN = 80;
+const trailGeo  = new THREE.BufferGeometry();
+const trailPos  = new Float32Array(TRAIL_LEN * 3);
+trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+trailGeo.setDrawRange(0, 0);
+const trailMesh = new THREE.Points(trailGeo, new THREE.PointsMaterial({
+  color: 0xDDEEFF, size: 0.10, transparent: true, opacity: 0.42, sizeAttenuation: true, depthWrite: false
+}));
+scene.add(trailMesh);
+
+const trailHistory = [];
+
+/* ─────────────────────────────────────────────────
+   RENDER LOOP
+───────────────────────────────────────────────── */
+const clock = new THREE.Clock();
+
+(function tick() {
+  requestAnimationFrame(tick);
+  const t = clock.getElapsedTime();
+
+  /* ── Stars slow drift ── */
+  if (scene._stars) scene._stars.rotation.y = t * 0.007;
+
+  /* ── Cloud drift ── */
+  clouds.forEach((c, i) => {
+    c.position.x += 0.0028 * (i % 2 === 0 ? 1 : -1);
+    if (c.position.x >  16) c.position.x = -16;
+    if (c.position.x < -16) c.position.x =  16;
+  });
+
+  /* ── Plane alive oscillation ── */
+  plane.group.position.y += Math.sin(t * 0.95) * 0.003;
+  plane.group.rotation.z  = Math.sin(t * 0.70) * 0.042;
+
+  /* ── Engine glow pulse ── */
+  plane.engLights.forEach((l, i) => {
+    l.intensity = 1.2 + Math.sin(t * 4.5 + i * 0.6) * 0.45;
+  });
+  /* ── Beacon strobe ── */
+  plane.noseBeacon.intensity = Math.sin(t * 2.8) > 0.8 ? 1.2 : 0.1;
+
+  /* ── Contrail update ── */
+  const pg = plane.group;
+  /* trail emits from the tail (behind on X axis, accounting for rotation) */
+  const tailOffset = new THREE.Vector3(-2.5, -0.1, 0).applyEuler(pg.rotation);
+  trailHistory.unshift(
+    pg.position.x + tailOffset.x,
+    pg.position.y + tailOffset.y,
+    pg.position.z + tailOffset.z
+  );
+  if (trailHistory.length > TRAIL_LEN * 3) trailHistory.splice(TRAIL_LEN * 3);
+  for (let i = 0; i < trailHistory.length; i++) trailPos[i] = trailHistory[i];
+  trailGeo.attributes.position.needsUpdate = true;
+  trailGeo.setDrawRange(0, Math.floor(trailHistory.length / 3));
+
+  /* ── Sky dawn progress (driven by GSAP via skyU.uDawn externally) ── */
+
+  /* ── Dual-scene render ── */
+  renderer.clear();
+  renderer.render(skyScene, skyCam);
+  renderer.clearDepth();
+  renderer.render(scene, camera);
+})();
+
+/* ─────────────────────────────────────────────────
+   INTRO ANIMATION — plane flies in and past
+───────────────────────────────────────────────── */
+function runIntro() {
+  const tl = gsap.timeline({ defaults: { ease: 'power2.inOut' } });
+
+  /* Phase 1 — plane approaches from far right */
+  tl.to(plane.group.position, { x: 0.8, y: 1.2, z: 3.5, duration: 3.8, delay: 0.4 })
+    .to(plane.group.rotation,  { y: -0.08, duration: 3.8, delay: 0.4 }, '<')
+
+  /* Phase 2 — banks hard and soars up-left (fly-past over viewer) */
+    .to(plane.group.position, { x: -7, y: 4.5, z: -18, duration: 3.0, ease: 'power2.in' })
+    .to(plane.group.rotation,  { y: -0.65, z: -0.32, duration: 3.0, ease: 'power2.in' }, '<')
+    .to(skyU.uDawn,            { value: 0.35, duration: 3.0 }, '<')
+
+  /* Phase 3 — hero text animates in during fly-past */
+    .to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out' }, '-=2.5')
+    .to('.h1-line',      { opacity: 1, y: '0%', duration: 1.0, stagger: 0.13, ease: 'power3.out' }, '-=0.65')
+    .to('.hero-body',    { opacity: 1, y: 0, duration: 0.80, ease: 'power3.out' }, '-=0.55')
+    .to('.hero-btns',    { opacity: 1, y: 0, duration: 0.70, ease: 'power3.out' }, '-=0.45')
+    .to('.hero-scroll',  { opacity: 1, duration: 0.60 }, '-=0.25');
+}
+
+/* Loader — fill progress immediately (all 3D is procedural) */
+setTimeout(() => { document.getElementById('ldr-fill').style.width = '100%'; }, 60);
+
+gsap.to('#loader', {
+  opacity: 0, duration: 0.9, delay: 2.2,
+  onComplete() {
+    document.getElementById('loader').style.display = 'none';
+    runIntro();
+  }
+});
+
+/* ─────────────────────────────────────────────────
+   SCROLL ANIMATIONS
+───────────────────────────────────────────────── */
+
+/* Navbar sticky */
+ScrollTrigger.create({
+  start: 'top -60',
+  onUpdate(self) {
+    document.getElementById('nav').classList.toggle('stuck', self.scroll() > 60);
+  }
+});
+
+/* Plane continues its journey on scroll */
+ScrollTrigger.create({
+  trigger: '#hero',
+  start: 'top top',
+  end: 'bottom top',
+  scrub: 1.8,
+  onUpdate(self) {
+    const p = self.progress;
+    gsap.set(plane.group.position, { x: -7  - p * 22, y: 4.5 + p * 9,  z: -18 - p * 40 });
+    gsap.set(plane.group.rotation, { z: -0.32 - p * 0.18 });
+    skyU.uDawn.value = 0.35 + p * 0.55;
+    /* subtle camera pull-back */
+    gsap.set(camera.position, { z: 12 + p * 2.5 });
+  }
+});
+
+/* Mouse parallax on hero */
+document.addEventListener('mousemove', e => {
+  const nx = (e.clientX / W() - 0.5) * 2;
+  const ny = (e.clientY / H() - 0.5) * 2;
+  gsap.to(camera.position, {
+    x: nx * 0.45, y: 1.5 - ny * 0.28,
+    duration: 1.8, ease: 'power2.out', overwrite: 'auto'
+  });
+});
+
+/* Generic .rv reveal */
+gsap.utils.toArray('.rv').forEach(el => {
+  const p = { opacity: 1, duration: 1.05, ease: 'power3.out' };
+  if (el.classList.contains('rv-up'))  p.y = 0;
+  if (el.classList.contains('rv-lft')) p.x = 0;
+  if (el.classList.contains('rv-rgt')) p.x = 0;
+  gsap.to(el, { ...p, scrollTrigger: { trigger: el, start: 'top 86%' } });
+});
+
+/* Staggered card grids */
+[
+  ['.exp-card',  '#experiences'],
+  ['.room-card', '#rooms'],
+  ['.rev-card',  '#reviews'],
+  ['.gal-item',  '#gallery'],
+].forEach(([sel, trig]) => {
+  gsap.utils.toArray(sel).forEach((card, i) => {
+    gsap.from(card, {
+      opacity: 0, y: 55, duration: 0.9, delay: i * 0.12, ease: 'power3.out',
+      scrollTrigger: { trigger: trig, start: 'top 76%' }
+    });
+  });
+});
+
+/* About image parallax */
+gsap.to('.abt-img', {
+  yPercent: -14, ease: 'none',
+  scrollTrigger: { trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: true }
+});
+
+/* Stat counters */
+document.querySelectorAll('.stat-num').forEach(el => {
+  const target = +el.dataset.target;
+  ScrollTrigger.create({
+    trigger: el, start: 'top 80%',
+    onEnter() {
+      const obj = { v: 0 };
+      gsap.to(obj, {
+        v: target, duration: 2.2, ease: 'power2.out',
+        onUpdate() { el.textContent = Math.round(obj.v) + '+'; }
+      });
+    }
+  });
+});
+
+/* ─────────────────────────────────────────────────
+   CUSTOM CURSOR
+───────────────────────────────────────────────── */
+const dot  = document.getElementById('cur-dot');
+const ring = document.getElementById('cur-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  gsap.to(dot, { x: mx, y: my, duration: 0.08 });
+});
+(function lr() {
+  rx += (mx - rx) * 0.11;
+  ry += (my - ry) * 0.11;
+  gsap.set(ring, { x: rx, y: ry });
+  requestAnimationFrame(lr);
+})();
+
+document.querySelectorAll('a, button, .exp-card, .room-card, .gal-item, .rev-card').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hov'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hov'));
+});
+
+/* Hide cursor on touch devices */
+if ('ontouchstart' in window) {
+  dot.style.display = ring.style.display = 'none';
+  document.body.style.cursor = 'auto';
+}
+
+/* ─────────────────────────────────────────────────
+   RESIZE
+───────────────────────────────────────────────── */
+window.addEventListener('resize', () => {
+  camera.aspect = W() / H();
+  camera.updateProjectionMatrix();
+  renderer.setSize(W(), H());
+});
 </script>
 
 </body>
