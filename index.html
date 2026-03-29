@@ -1402,524 +1402,495 @@
      THREE.JS + ALL INTERACTIONS  (ES Module)
 ══════════════════════════════════════════════════════ -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script type="module">
+  /* ── imports (must be top-level in ES modules — cannot be inside try/catch) ── */
+  import * as THREE from 'https://esm.sh/three@0.160.0';
+  import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader';
+
+  /* Explicit global refs — avoids Safari ReferenceError in strict module scope */
+  const gsap          = window.gsap;
+  const ScrollTrigger = window.ScrollTrigger;
+  gsap.registerPlugin(ScrollTrigger);
 
 try {
-/* ── imports ─────────────────────────────────────── */
-/* esm.sh handles sub-path exports reliably in all browsers */
-import * as THREE from ‘https://esm.sh/three@0.160.0’;
-import { GLTFLoader } from ‘https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader’;
 
-/* Explicit global refs — avoids Safari ReferenceError in strict module scope */
-const gsap          = window.gsap;
-const ScrollTrigger = window.ScrollTrigger;
-gsap.registerPlugin(ScrollTrigger);
+  /* ──────────────────────────────────────────────────
+     ① THREE.JS SCENE
+  ────────────────────────────────────────────────── */
+  const canvas   = document.getElementById('c3d');
+  const W = () => canvas.clientWidth;
+  const H = () => canvas.clientHeight;
 
-/* ──────────────────────────────────────────────────
-① THREE.JS SCENE
-────────────────────────────────────────────────── */
-const canvas   = document.getElementById(‘c3d’);
-const W = () => canvas.clientWidth;
-const H = () => canvas.clientHeight;
+  /* Scene */
+  const scene = new THREE.Scene();
 
-/* Scene */
-const scene = new THREE.Scene();
+  /* Fog — adds mystery depth */
+  scene.fog = new THREE.FogExp2(0x050403, 0.14);
 
-/* Fog — adds mystery depth */
-scene.fog = new THREE.FogExp2(0x050403, 0.14);
+  /* Camera — use window dimensions; canvas.clientWidth can be 0 at module init */
+  const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 80);
+  camera.position.set(1.8, 0.2, 5.5);
 
-/* Camera — use window dimensions; canvas.clientWidth can be 0 at module init */
-const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 80);
-camera.position.set(1.8, 0.2, 5.5);
+  /* Renderer */
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias : true,
+    alpha     : true,
+    powerPreference: 'high-performance'
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.6;
+  renderer.outputColorSpace    = THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled   = true;
+  renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
 
-/* Renderer */
-const renderer = new THREE.WebGLRenderer({
-canvas,
-antialias : true,
-alpha     : true,
-powerPreference: ‘high-performance’
-});
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.toneMapping         = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.6;
-renderer.outputColorSpace    = THREE.SRGBColorSpace;
-renderer.shadowMap.enabled   = true;
-renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
+  /* ── Lights ───────────────────────────────────────── */
+  /* Ambient — very warm, dim */
+  const ambient = new THREE.AmbientLight(0x1a1008, 1.5);
+  scene.add(ambient);
 
-/* ── Lights ───────────────────────────────────────── */
-/* Ambient — very warm, dim */
-const ambient = new THREE.AmbientLight(0x1a1008, 1.5);
-scene.add(ambient);
+  /* Key light — warm gold */
+  const keyLight = new THREE.PointLight(0xC8A97E, 12, 25);
+  keyLight.position.set(3, 3, 4);
+  keyLight.castShadow = true;
+  scene.add(keyLight);
 
-/* Key light — warm gold */
-const keyLight = new THREE.PointLight(0xC8A97E, 12, 25);
-keyLight.position.set(3, 3, 4);
-keyLight.castShadow = true;
-scene.add(keyLight);
+  /* Fill light — orange-warm */
+  const fillLight = new THREE.PointLight(0xFF8C42, 5, 18);
+  fillLight.position.set(-3, -1, 3);
+  scene.add(fillLight);
 
-/* Fill light — orange-warm */
-const fillLight = new THREE.PointLight(0xFF8C42, 5, 18);
-fillLight.position.set(-3, -1, 3);
-scene.add(fillLight);
+  /* Rim light — cool accent */
+  const rimLight = new THREE.DirectionalLight(0xBFA06A, 1.2);
+  rimLight.position.set(0, 6, -4);
+  scene.add(rimLight);
 
-/* Rim light — cool accent */
-const rimLight = new THREE.DirectionalLight(0xBFA06A, 1.2);
-rimLight.position.set(0, 6, -4);
-scene.add(rimLight);
+  /* ── Particle Field ────────────────────────────────── */
+  {
+    const geo  = new THREE.BufferGeometry();
+    const N    = 2200;
+    const pos  = new Float32Array(N * 3);
+    const sizes = new Float32Array(N);
 
-/* ── Particle Field ────────────────────────────────── */
-{
-const geo  = new THREE.BufferGeometry();
-const N    = 2200;
-const pos  = new Float32Array(N * 3);
-const sizes = new Float32Array(N);
-
-```
-for (let i = 0; i < N; i++) {
-  pos[i*3]   = (Math.random() - 0.5) * 32;
-  pos[i*3+1] = (Math.random() - 0.5) * 32;
-  pos[i*3+2] = (Math.random() - 0.5) * 32;
-  sizes[i]   = Math.random() * 0.015 + 0.005;
-}
-
-geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-geo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
-
-const mat = new THREE.PointsMaterial({
-  color       : 0xC8A97E,
-  size        : 0.018,
-  transparent : true,
-  opacity     : 0.35,
-  sizeAttenuation: true,
-  depthWrite  : false,
-});
-
-const stars = new THREE.Points(geo, mat);
-scene.add(stars);
-
-/* slow rotation in RAF below */
-scene._stars = stars;
-```
-
-}
-
-/* ── GLB Model ─────────────────────────────────────── */
-/*
-
-- We load the official Khronos Group Lantern model.
-- This is a detailed metallic & glass ornate lantern — perfect
-- for a Moroccan luxury brand.
-- Source: https://github.com/KhronosGroup/glTF-Sample-Models
-  */
-  const MODEL_URL =
-  ‘https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@main’ +
-  ‘/2.0/Lantern/glTF-Binary/Lantern.glb’;
-
-let mesh3d        = null;  /* the loaded/fallback model */
-let baseScale     = 1;
-let modelLoaded   = false;
-let autoRotTween  = null;  /* GSAP auto-rotation */
-
-const loader = new GLTFLoader();
-
-function onModelReady(group, scale) {
-mesh3d     = group;
-baseScale  = scale;
-modelLoaded = true;
-scene.add(mesh3d);
-
-```
-/* Animate in — elastic pop */
-gsap.from(mesh3d.scale, {
-  x: 0.001, y: 0.001, z: 0.001,
-  duration: 2.2,
-  ease: 'elastic.out(1, 0.42)',
-  delay: 0.2
-});
-
-/* Continuous gentle auto-rotation — GSAP owns .rotation.y */
-autoRotTween = gsap.to(mesh3d.rotation, {
-  y    : '+=' + (Math.PI * 2),
-  duration: 22,
-  repeat  : -1,
-  ease    : 'none',
-});
-
-/* Scroll: move down + slightly shrink as hero exits */
-gsap.timeline({
-  scrollTrigger: {
-    trigger : '#hero',
-    start   : 'top top',
-    end     : 'bottom top',
-    scrub   : 1.8
-  }
-})
-.to(mesh3d.position, { y: -2.2, ease: 'none' }, 0)
-.to(mesh3d.scale,    {
-  x: baseScale * 0.4,
-  y: baseScale * 0.4,
-  z: baseScale * 0.4,
-  ease: 'none'
-}, 0)
-.to(camera.position, { z: 7.5, ease: 'none' }, 0);
-
-hideLoader();
-```
-
-}
-
-loader.load(
-MODEL_URL,
-(gltf) => {
-const group = gltf.scene;
-
-```
-  /* Center & normalise scale */
-  const box    = new THREE.Box3().setFromObject(group);
-  const center = box.getCenter(new THREE.Vector3());
-  const size   = box.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-
-  group.position.sub(center);
-  const s = 2.6 / maxDim;
-  group.scale.setScalar(s);
-
-  /* Slight right-side offset so model doesn't cover the text */
-  group.position.x = 1.5;
-
-  /* Enhance material quality on each mesh */
-  group.traverse(child => {
-    if (!child.isMesh) return;
-    child.castShadow    = true;
-    child.receiveShadow = true;
-    if (child.material) {
-      /* Boost metalness & reflectivity for premium look */
-      if (child.material.metalness !== undefined) {
-        child.material.metalness = Math.max(child.material.metalness, 0.55);
-        child.material.roughness = Math.min(child.material.roughness, 0.45);
-      }
-      child.material.needsUpdate = true;
+    for (let i = 0; i < N; i++) {
+      pos[i*3]   = (Math.random() - 0.5) * 32;
+      pos[i*3+1] = (Math.random() - 0.5) * 32;
+      pos[i*3+2] = (Math.random() - 0.5) * 32;
+      sizes[i]   = Math.random() * 0.015 + 0.005;
     }
-  });
 
-  onModelReady(group, s);
-},
-/* progress */
-(xhr) => {
-  if (xhr.total > 0) {
-    const pct = (xhr.loaded / xhr.total) * 100;
-    document.getElementById('ldr-fill').style.width = pct + '%';
-  }
-},
-/* error — build beautiful fallback */
-(err) => {
-  console.warn('GLB load failed — using procedural fallback:', err);
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
 
-  /* ─── Fallback: Ornate ring-lantern structure ─── */
-  const group = new THREE.Group();
+    const mat = new THREE.PointsMaterial({
+      color       : 0xC8A97E,
+      size        : 0.018,
+      transparent : true,
+      opacity     : 0.35,
+      sizeAttenuation: true,
+      depthWrite  : false,
+    });
 
-  /* Vertical chain */
-  const chainMat = new THREE.MeshPhongMaterial({
-    color: 0xBFA06A, specular: 0xFFD700, shininess: 180,
-    emissive: 0x2D1A08
-  });
-  for (let i = 0; i < 6; i++) {
-    const t = new THREE.TorusGeometry(0.06, 0.018, 8, 20);
-    const m = new THREE.Mesh(t, chainMat);
-    m.position.y = 1.4 + i * 0.12;
-    m.rotation.x = (i % 2 === 0) ? 0 : Math.PI * 0.5;
-    group.add(m);
+    const stars = new THREE.Points(geo, mat);
+    scene.add(stars);
+
+    /* slow rotation in RAF below */
+    scene._stars = stars;
   }
 
-  /* Rings around a central axis */
-  const ringMat = new THREE.MeshPhongMaterial({
-    color: 0xC8A97E, specular: 0xFFE066, shininess: 200,
-    emissive: 0x1A0F04,
-    wireframe: false
-  });
-  const ringSizes = [0.55, 0.70, 0.80, 0.70, 0.55];
-  const tubeRad   = [0.014, 0.01, 0.014, 0.01, 0.014];
-  ringSizes.forEach((r, i) => {
-    const geo  = new THREE.TorusGeometry(r, tubeRad[i], 12, 80);
-    const mesh = new THREE.Mesh(geo, ringMat);
-    mesh.position.y = -0.6 + i * 0.3;
-    group.add(mesh);
-  });
+  /* ── GLB Model ─────────────────────────────────────── */
+  /*
+   * We load the official Khronos Group Lantern model.
+   * This is a detailed metallic & glass ornate lantern — perfect
+   * for a Moroccan luxury brand.
+   * Source: https://github.com/KhronosGroup/glTF-Sample-Models
+   */
+  const MODEL_URL =
+    'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@main' +
+    '/2.0/Lantern/glTF-Binary/Lantern.glb';
 
-  /* Decorative arced spines */
-  for (let i = 0; i < 8; i++) {
-    const angle = (i / 8) * Math.PI * 2;
-    const geo = new THREE.CylinderGeometry(0.008, 0.008, 1.2, 8);
-    const m   = new THREE.Mesh(geo, chainMat);
-    m.position.set(Math.cos(angle) * 0.72, 0, Math.sin(angle) * 0.72);
-    m.rotation.z = Math.PI * 0.5 - 0.35;
-    m.rotation.y = angle;
-    group.add(m);
+  let mesh3d        = null;  /* the loaded/fallback model */
+  let baseScale     = 1;
+  let modelLoaded   = false;
+  let autoRotTween  = null;  /* GSAP auto-rotation */
+
+  const loader = new GLTFLoader();
+
+  function onModelReady(group, scale) {
+    mesh3d     = group;
+    baseScale  = scale;
+    modelLoaded = true;
+    scene.add(mesh3d);
+
+    /* Animate in — elastic pop */
+    gsap.from(mesh3d.scale, {
+      x: 0.001, y: 0.001, z: 0.001,
+      duration: 2.2,
+      ease: 'elastic.out(1, 0.42)',
+      delay: 0.2
+    });
+
+    /* Continuous gentle auto-rotation — GSAP owns .rotation.y */
+    autoRotTween = gsap.to(mesh3d.rotation, {
+      y    : '+=' + (Math.PI * 2),
+      duration: 22,
+      repeat  : -1,
+      ease    : 'none',
+    });
+
+    /* Scroll: move down + slightly shrink as hero exits */
+    gsap.timeline({
+      scrollTrigger: {
+        trigger : '#hero',
+        start   : 'top top',
+        end     : 'bottom top',
+        scrub   : 1.8
+      }
+    })
+    .to(mesh3d.position, { y: -2.2, ease: 'none' }, 0)
+    .to(mesh3d.scale,    {
+      x: baseScale * 0.4,
+      y: baseScale * 0.4,
+      z: baseScale * 0.4,
+      ease: 'none'
+    }, 0)
+    .to(camera.position, { z: 7.5, ease: 'none' }, 0);
+
+    hideLoader();
   }
 
-  /* Central gem */
-  const gemGeo = new THREE.OctahedronGeometry(0.18, 1);
-  const gemMat = new THREE.MeshPhongMaterial({
-    color: 0xC8A97E, specular: 0xFFFFAA, shininess: 300,
-    emissive: 0x4D320A, transparent: true, opacity: 0.92
+  loader.load(
+    MODEL_URL,
+    (gltf) => {
+      const group = gltf.scene;
+
+      /* Center & normalise scale */
+      const box    = new THREE.Box3().setFromObject(group);
+      const center = box.getCenter(new THREE.Vector3());
+      const size   = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+
+      group.position.sub(center);
+      const s = 2.6 / maxDim;
+      group.scale.setScalar(s);
+
+      /* Slight right-side offset so model doesn't cover the text */
+      group.position.x = 1.5;
+
+      /* Enhance material quality on each mesh */
+      group.traverse(child => {
+        if (!child.isMesh) return;
+        child.castShadow    = true;
+        child.receiveShadow = true;
+        if (child.material) {
+          /* Boost metalness & reflectivity for premium look */
+          if (child.material.metalness !== undefined) {
+            child.material.metalness = Math.max(child.material.metalness, 0.55);
+            child.material.roughness = Math.min(child.material.roughness, 0.45);
+          }
+          child.material.needsUpdate = true;
+        }
+      });
+
+      onModelReady(group, s);
+    },
+    /* progress */
+    (xhr) => {
+      if (xhr.total > 0) {
+        const pct = (xhr.loaded / xhr.total) * 100;
+        document.getElementById('ldr-fill').style.width = pct + '%';
+      }
+    },
+    /* error — build beautiful fallback */
+    (err) => {
+      console.warn('GLB load failed — using procedural fallback:', err);
+
+      /* ─── Fallback: Ornate ring-lantern structure ─── */
+      const group = new THREE.Group();
+
+      /* Vertical chain */
+      const chainMat = new THREE.MeshPhongMaterial({
+        color: 0xBFA06A, specular: 0xFFD700, shininess: 180,
+        emissive: 0x2D1A08
+      });
+      for (let i = 0; i < 6; i++) {
+        const t = new THREE.TorusGeometry(0.06, 0.018, 8, 20);
+        const m = new THREE.Mesh(t, chainMat);
+        m.position.y = 1.4 + i * 0.12;
+        m.rotation.x = (i % 2 === 0) ? 0 : Math.PI * 0.5;
+        group.add(m);
+      }
+
+      /* Rings around a central axis */
+      const ringMat = new THREE.MeshPhongMaterial({
+        color: 0xC8A97E, specular: 0xFFE066, shininess: 200,
+        emissive: 0x1A0F04,
+        wireframe: false
+      });
+      const ringSizes = [0.55, 0.70, 0.80, 0.70, 0.55];
+      const tubeRad   = [0.014, 0.01, 0.014, 0.01, 0.014];
+      ringSizes.forEach((r, i) => {
+        const geo  = new THREE.TorusGeometry(r, tubeRad[i], 12, 80);
+        const mesh = new THREE.Mesh(geo, ringMat);
+        mesh.position.y = -0.6 + i * 0.3;
+        group.add(mesh);
+      });
+
+      /* Decorative arced spines */
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const geo = new THREE.CylinderGeometry(0.008, 0.008, 1.2, 8);
+        const m   = new THREE.Mesh(geo, chainMat);
+        m.position.set(Math.cos(angle) * 0.72, 0, Math.sin(angle) * 0.72);
+        m.rotation.z = Math.PI * 0.5 - 0.35;
+        m.rotation.y = angle;
+        group.add(m);
+      }
+
+      /* Central gem */
+      const gemGeo = new THREE.OctahedronGeometry(0.18, 1);
+      const gemMat = new THREE.MeshPhongMaterial({
+        color: 0xC8A97E, specular: 0xFFFFAA, shininess: 300,
+        emissive: 0x4D320A, transparent: true, opacity: 0.92
+      });
+      const gem = new THREE.Mesh(gemGeo, gemMat);
+      group.add(gem);
+
+      group.position.x = 1.5;
+      const s = 1;
+      group.scale.setScalar(s);
+
+      onModelReady(group, s);
+      document.getElementById('ldr-fill').style.width = '100%';
+    }
+  );
+
+  /* ── Render loop ─────────────────────────────────── */
+  const clock = new THREE.Clock();
+
+  function tick() {
+    requestAnimationFrame(tick);
+
+    const t = clock.getElapsedTime();
+
+    /* Stars drift */
+    if (scene._stars) {
+      scene._stars.rotation.y = t * 0.018;
+      scene._stars.rotation.x = t * 0.009;
+    }
+
+    /* Pulsing warm key light */
+    keyLight.intensity = 12 + Math.sin(t * 1.6) * 2.5;
+
+    /* Key light orbits model slowly */
+    keyLight.position.x = 3 + Math.cos(t * 0.45) * 0.8;
+    keyLight.position.z = 4 + Math.sin(t * 0.45) * 0.8;
+
+    /* Gentle float of model — handled via GSAP to avoid ScrollTrigger conflict */
+    /* (RAF no longer touches position.y — GSAP owns it) */
+
+    renderer.render(scene, camera);
+  }
+  tick();
+
+  /* ── Resize ──────────────────────────────────────── */
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
   });
-  const gem = new THREE.Mesh(gemGeo, gemMat);
-  group.add(gem);
 
-  group.position.x = 1.5;
-  const s = 1;
-  group.scale.setScalar(s);
+  /* ── Mouse parallax on hero camera ──────────────── */
+  document.addEventListener('mousemove', e => {
+    const nx = (e.clientX / window.innerWidth  - 0.5) * 2;
+    const ny = (e.clientY / window.innerHeight - 0.5) * 2;
 
-  onModelReady(group, s);
-  document.getElementById('ldr-fill').style.width = '100%';
-}
-```
+    gsap.to(camera.position, {
+      x: 1.8 + nx * 0.35,
+      y: 0.2 - ny * 0.2,
+      duration: 1.8,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+  });
 
-);
+  /* ──────────────────────────────────────────────────
+     ② LOADING → HIDE
+  ────────────────────────────────────────────────── */
+  let loaderHidden = false;
 
-/* ── Render loop ─────────────────────────────────── */
-const clock = new THREE.Clock();
+  function hideLoader() {
+    if (loaderHidden) return;
+    loaderHidden = true;
 
-function tick() {
-requestAnimationFrame(tick);
-
-```
-const t = clock.getElapsedTime();
-
-/* Stars drift */
-if (scene._stars) {
-  scene._stars.rotation.y = t * 0.018;
-  scene._stars.rotation.x = t * 0.009;
-}
-
-/* Pulsing warm key light */
-keyLight.intensity = 12 + Math.sin(t * 1.6) * 2.5;
-
-/* Key light orbits model slowly */
-keyLight.position.x = 3 + Math.cos(t * 0.45) * 0.8;
-keyLight.position.z = 4 + Math.sin(t * 0.45) * 0.8;
-
-/* Gentle float of model — handled via GSAP to avoid ScrollTrigger conflict */
-/* (RAF no longer touches position.y — GSAP owns it) */
-
-renderer.render(scene, camera);
-```
-
-}
-tick();
-
-/* ── Resize ──────────────────────────────────────── */
-window.addEventListener(‘resize’, () => {
-camera.aspect = window.innerWidth / window.innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-/* ── Mouse parallax on hero camera ──────────────── */
-document.addEventListener(‘mousemove’, e => {
-const nx = (e.clientX / window.innerWidth  - 0.5) * 2;
-const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-
-```
-gsap.to(camera.position, {
-  x: 1.8 + nx * 0.35,
-  y: 0.2 - ny * 0.2,
-  duration: 1.8,
-  ease: 'power2.out',
-  overwrite: 'auto'
-});
-```
-
-});
-
-/* ──────────────────────────────────────────────────
-② LOADING → HIDE
-────────────────────────────────────────────────── */
-let loaderHidden = false;
-
-function hideLoader() {
-if (loaderHidden) return;
-loaderHidden = true;
-
-```
-gsap.to('#loader', {
-  opacity  : 0,
-  duration : 1.1,
-  delay    : 0.4,
-  ease     : 'power2.inOut',
-  onComplete() {
-    document.getElementById('loader').style.display = 'none';
-    runHeroIntro();
-  }
-});
-```
-
-}
-
-/* Safety: hide loader after 5s even if model is slow */
-setTimeout(() => {
-document.getElementById(‘ldr-fill’).style.width = ‘100%’;
-hideLoader();
-}, 5000);
-
-/* ──────────────────────────────────────────────────
-③ HERO INTRO ANIMATION
-────────────────────────────────────────────────── */
-function runHeroIntro() {
-const tl = gsap.timeline({ defaults: { ease: ‘power4.out’ } });
-
-```
-tl.to('.hero-eyebrow', { opacity:1, y:0, duration:.9 })
-  .to('.h1-line',  { opacity:1, y:'0%', duration:1.05, stagger:.14 }, '-=.5')
-  .to('.hero-body', { opacity:1, y:0, duration:.85 }, '-=.45')
-  .to('.hero-btns', { opacity:1, y:0, duration:.8  }, '-=.4')
-  .to('.hero-scroll',{ opacity:1, duration:.8       }, '-=.2');
-```
-
-}
-
-/* ──────────────────────────────────────────────────
-④ SCROLL ANIMATIONS
-────────────────────────────────────────────────── */
-
-/* Navbar sticky */
-ScrollTrigger.create({
-start: ‘top -60’,
-onUpdate(self) {
-document.getElementById(‘nav’)
-.classList.toggle(‘stuck’, self.scroll() > 60);
-}
-});
-
-/* Generic reveal — all .rv elements */
-gsap.utils.toArray(’.rv’).forEach(el => {
-const isUp  = el.classList.contains(‘rv-up’);
-const isLft = el.classList.contains(‘rv-lft’);
-const isRgt = el.classList.contains(‘rv-rgt’);
-
-```
-const props = { opacity:1, duration:1.05, ease:'power3.out' };
-if (isUp)  props.y = 0;
-if (isLft) props.x = 0;
-if (isRgt) props.x = 0;
-
-gsap.to(el, {
-  ...props,
-  scrollTrigger: {
-    trigger: el,
-    start  : 'top 86%',
-    toggleActions: 'play none none none'
-  }
-});
-```
-
-});
-
-/* Staggered cards */
-function staggerCards(selector, parentTrigger) {
-const cards = gsap.utils.toArray(selector);
-cards.forEach((card, i) => {
-gsap.from(card, {
-opacity: 0, y: 60,
-duration: .9, delay: i * 0.13,
-ease: ‘power3.out’,
-scrollTrigger: {
-trigger: parentTrigger,
-start  : ‘top 74%’
-}
-});
-});
-}
-
-staggerCards(’.exp-card’,  ‘#experiences’);
-staggerCards(’.room-card’, ‘#rooms’);
-staggerCards(’.rev-card’,  ‘#reviews’);
-staggerCards(’.gal-item’,  ‘#gallery’);
-
-/* About image parallax */
-gsap.to(’.about-img’, {
-yPercent : -14,
-ease     : ‘none’,
-scrollTrigger: {
-trigger: ‘#about’,
-start  : ‘top bottom’,
-end    : ‘bottom top’,
-scrub  : true
-}
-});
-
-/* Counter animation on stats */
-document.querySelectorAll(’.stat-num’).forEach(el => {
-const target = +el.dataset.target;
-const suffix = el.dataset.target.toString().includes(‘K’) ? ‘K+’ : ‘+’;
-
-```
-ScrollTrigger.create({
-  trigger: el,
-  start  : 'top 80%',
-  onEnter() {
-    const obj = { val: 0 };
-    gsap.to(obj, {
-      val: target, duration: 2.2, ease: 'power2.out',
-      onUpdate() {
-        el.textContent = Math.round(obj.val) + suffix;
+    gsap.to('#loader', {
+      opacity  : 0,
+      duration : 1.1,
+      delay    : 0.4,
+      ease     : 'power2.inOut',
+      onComplete() {
+        document.getElementById('loader').style.display = 'none';
+        runHeroIntro();
       }
     });
   }
-});
-```
 
-});
+  /* Safety: hide loader after 5s even if model is slow */
+  setTimeout(() => {
+    document.getElementById('ldr-fill').style.width = '100%';
+    hideLoader();
+  }, 5000);
 
-/* ──────────────────────────────────────────────────
-⑤ CUSTOM CURSOR
-────────────────────────────────────────────────── */
-const dot  = document.getElementById(‘cur-dot’);
-const ring = document.getElementById(‘cur-ring’);
+  /* ──────────────────────────────────────────────────
+     ③ HERO INTRO ANIMATION
+  ────────────────────────────────────────────────── */
+  function runHeroIntro() {
+    const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-let mx = 0, my = 0;
-let rx = 0, ry = 0;
+    tl.to('.hero-eyebrow', { opacity:1, y:0, duration:.9 })
+      .to('.h1-line',  { opacity:1, y:'0%', duration:1.05, stagger:.14 }, '-=.5')
+      .to('.hero-body', { opacity:1, y:0, duration:.85 }, '-=.45')
+      .to('.hero-btns', { opacity:1, y:0, duration:.8  }, '-=.4')
+      .to('.hero-scroll',{ opacity:1, duration:.8       }, '-=.2');
+  }
 
-document.addEventListener(‘mousemove’, e => {
-mx = e.clientX; my = e.clientY;
-gsap.to(dot, { x: mx, y: my, duration:.08 });
-});
+  /* ──────────────────────────────────────────────────
+     ④ SCROLL ANIMATIONS
+  ────────────────────────────────────────────────── */
 
-(function followRing() {
-rx += (mx - rx) * 0.11;
-ry += (my - ry) * 0.11;
-gsap.set(ring, { x: rx, y: ry });
-requestAnimationFrame(followRing);
-})();
+  /* Navbar sticky */
+  ScrollTrigger.create({
+    start: 'top -60',
+    onUpdate(self) {
+      document.getElementById('nav')
+        .classList.toggle('stuck', self.scroll() > 60);
+    }
+  });
 
-const hoverEls = document.querySelectorAll(
-‘a, button, .exp-card, .room-card, .gal-item, .rev-card’
-);
-hoverEls.forEach(el => {
-el.addEventListener(‘mouseenter’, () => document.body.classList.add(‘cur-hover’));
-el.addEventListener(‘mouseleave’, () => document.body.classList.remove(‘cur-hover’));
-});
+  /* Generic reveal — all .rv elements */
+  gsap.utils.toArray('.rv').forEach(el => {
+    const isUp  = el.classList.contains('rv-up');
+    const isLft = el.classList.contains('rv-lft');
+    const isRgt = el.classList.contains('rv-rgt');
 
-/* Hide cursor on mobile */
-if (‘ontouchstart’ in window) {
-dot.style.display  = ‘none’;
-ring.style.display = ‘none’;
-document.body.style.cursor = ‘auto’;
-}
+    const props = { opacity:1, duration:1.05, ease:'power3.out' };
+    if (isUp)  props.y = 0;
+    if (isLft) props.x = 0;
+    if (isRgt) props.x = 0;
+
+    gsap.to(el, {
+      ...props,
+      scrollTrigger: {
+        trigger: el,
+        start  : 'top 86%',
+        toggleActions: 'play none none none'
+      }
+    });
+  });
+
+  /* Staggered cards */
+  function staggerCards(selector, parentTrigger) {
+    const cards = gsap.utils.toArray(selector);
+    cards.forEach((card, i) => {
+      gsap.from(card, {
+        opacity: 0, y: 60,
+        duration: .9, delay: i * 0.13,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: parentTrigger,
+          start  : 'top 74%'
+        }
+      });
+    });
+  }
+
+  staggerCards('.exp-card',  '#experiences');
+  staggerCards('.room-card', '#rooms');
+  staggerCards('.rev-card',  '#reviews');
+  staggerCards('.gal-item',  '#gallery');
+
+  /* About image parallax */
+  gsap.to('.about-img', {
+    yPercent : -14,
+    ease     : 'none',
+    scrollTrigger: {
+      trigger: '#about',
+      start  : 'top bottom',
+      end    : 'bottom top',
+      scrub  : true
+    }
+  });
+
+  /* Counter animation on stats */
+  document.querySelectorAll('.stat-num').forEach(el => {
+    const target = +el.dataset.target;
+    const suffix = el.dataset.target.toString().includes('K') ? 'K+' : '+';
+
+    ScrollTrigger.create({
+      trigger: el,
+      start  : 'top 80%',
+      onEnter() {
+        const obj = { val: 0 };
+        gsap.to(obj, {
+          val: target, duration: 2.2, ease: 'power2.out',
+          onUpdate() {
+            el.textContent = Math.round(obj.val) + suffix;
+          }
+        });
+      }
+    });
+  });
+
+  /* ──────────────────────────────────────────────────
+     ⑤ CUSTOM CURSOR
+  ────────────────────────────────────────────────── */
+  const dot  = document.getElementById('cur-dot');
+  const ring = document.getElementById('cur-ring');
+
+  let mx = 0, my = 0;
+  let rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    gsap.to(dot, { x: mx, y: my, duration:.08 });
+  });
+
+  (function followRing() {
+    rx += (mx - rx) * 0.11;
+    ry += (my - ry) * 0.11;
+    gsap.set(ring, { x: rx, y: ry });
+    requestAnimationFrame(followRing);
+  })();
+
+  const hoverEls = document.querySelectorAll(
+    'a, button, .exp-card, .room-card, .gal-item, .rev-card'
+  );
+  hoverEls.forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cur-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cur-hover'));
+  });
+
+  /* Hide cursor on mobile */
+  if ('ontouchstart' in window) {
+    dot.style.display  = 'none';
+    ring.style.display = 'none';
+    document.body.style.cursor = 'auto';
+  }
 
 } catch (err) {
-/* Emergency: any uncaught error hides loader so site isn’t blocked */
-console.error(’[MAISON NOMADE] Critical module error:’, err);
-const ldr = document.getElementById(‘loader’);
-if (ldr) ldr.style.display = ‘none’;
-const _gsap = window.gsap;
-if (_gsap) {
-_gsap.to(
-‘.hero-eyebrow,.h1-line,.hero-body,.hero-btns,.hero-scroll’,
-{ opacity:1, y:0, duration:.9, stagger:.1, ease:‘power3.out’ }
-);
-}
+  /* Emergency: any uncaught error hides loader so site isn't blocked */
+  console.error('[MAISON NOMADE] Critical module error:', err);
+  const ldr = document.getElementById('loader');
+  if (ldr) ldr.style.display = 'none';
+  const _gsap = window.gsap;
+  if (_gsap) {
+    _gsap.to(
+      '.hero-eyebrow,.h1-line,.hero-body,.hero-btns,.hero-scroll',
+      { opacity:1, y:0, duration:.9, stagger:.1, ease:'power3.out' }
+    );
+  }
 }
 
 </script>
