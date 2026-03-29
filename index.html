@@ -1,135 +1,2120 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Brand Ultra Clean</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Riad Soleil d'Or — Marrakech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #ffffff;
-  overflow-x: hidden;
-}
+  <style>
+    /* ============================================================
+       RESET & VARIABLES
+    ============================================================ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-.hero {
-  position: absolute;
-  z-index: 10;
-  top: 40%;
-  left: 10%;
-}
+    :root {
+      --noir:    #0a0a08;
+      --noir2:   #111110;
+      --or:      #c9a96e;
+      --or-pale: #e2cfa0;
+      --creme:   #f5f0e8;
+      --creme2:  #ede6d6;
+      --blanc:   #fdfcf9;
+      --gris:    #6b6b60;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out:   cubic-bezier(0.76, 0, 0.24, 1);
+    }
 
-h1 {
-  font-size: 60px;
-  margin: 0;
-}
+    html { scroll-behavior: auto; font-size: 16px; }
 
-p {
-  opacity: 0.6;
-}
+    body {
+      background: var(--noir);
+      color: var(--creme);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
 
-section {
-  height: 100vh;
-}
+    /* ============================================================
+       CUSTOM CURSOR
+    ============================================================ */
+    #cursor {
+      position: fixed;
+      width: 10px; height: 10px;
+      background: var(--or);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, width 0.3s var(--ease-out-expo), height 0.3s var(--ease-out-expo), background 0.3s;
+      mix-blend-mode: difference;
+    }
+    #cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(201,169,110,0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.08s, width 0.4s var(--ease-out-expo), height 0.4s var(--ease-out-expo), opacity 0.3s;
+    }
+    body:hover #cursor-ring { opacity: 1; }
+    .cursor-hover #cursor { width: 18px; height: 18px; }
+    .cursor-hover #cursor-ring { width: 60px; height: 60px; opacity: 0.4; }
 
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-</style>
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--noir); }
+    ::-webkit-scrollbar-thumb { background: var(--or); border-radius: 2px; }
+
+    /* ============================================================
+       LOADER
+    ============================================================ */
+    #loader {
+      position: fixed; inset: 0;
+      background: var(--noir);
+      z-index: 8000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+    #loader-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 300;
+      color: var(--or);
+      letter-spacing: 0.2em;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: loaderIn 1s var(--ease-out-expo) 0.3s forwards;
+    }
+    #loader-bar-wrap {
+      width: 200px;
+      height: 1px;
+      background: rgba(201,169,110,0.2);
+      overflow: hidden;
+    }
+    #loader-bar {
+      height: 100%;
+      background: var(--or);
+      width: 0%;
+      transition: width 2s var(--ease-out-expo);
+    }
+    #loader-pct {
+      font-family: 'Jost', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--gris);
+    }
+    @keyframes loaderIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       NAVIGATION
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 2rem 4vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      mix-blend-mode: normal;
+      transition: padding 0.4s var(--ease-out-expo), background 0.4s;
+    }
+    nav.scrolled {
+      padding: 1.2rem 4vw;
+      background: rgba(10,10,8,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,169,110,0.1);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--creme);
+      text-decoration: none;
+      letter-spacing: 0.15em;
+    }
+    .nav-logo span { color: var(--or); }
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--or);
+      transition: width 0.4s var(--ease-out-expo);
+    }
+    .nav-links a:hover { color: var(--or); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--noir);
+      background: var(--or);
+      padding: 0.7rem 1.8rem;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .nav-cta:hover { background: var(--or-pale); transform: translateY(-1px); }
+
+    /* ============================================================
+       HERO SECTION
+    ============================================================ */
+    #hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #canvas-hero {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4rem, 10vw, 10rem);
+      font-weight: 300;
+      line-height: 0.92;
+      color: var(--creme);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--or);
+    }
+    .hero-subtitle {
+      font-size: clamp(0.8rem, 1.5vw, 1rem);
+      font-weight: 200;
+      letter-spacing: 0.15em;
+      color: rgba(245,240,232,0.6);
+      margin-bottom: 3.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: all;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1.1rem 2.8rem;
+      background: var(--or);
+      color: var(--noir);
+      text-decoration: none;
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: all 0.4s var(--ease-out-expo);
+    }
+    .btn-primary:hover {
+      background: var(--or-pale);
+      transform: translateY(-2px);
+      box-shadow: 0 20px 60px rgba(201,169,110,0.25);
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1.1rem 2.8rem;
+      border: 1px solid rgba(201,169,110,0.4);
+      color: var(--or);
+      text-decoration: none;
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 400;
+      transition: all 0.4s var(--ease-out-expo);
+    }
+    .btn-ghost:hover {
+      background: rgba(201,169,110,0.07);
+      border-color: var(--or);
+      transform: translateY(-2px);
+    }
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      z-index: 2;
+      opacity: 0;
+    }
+    .hero-scroll-hint span {
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.4);
+    }
+    .scroll-line {
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(to bottom, var(--or), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { transform: scaleY(1); opacity: 1; }
+      50% { transform: scaleY(0.6); opacity: 0.4; }
+    }
+
+    /* ============================================================
+       SECTION SHARED
+    ============================================================ */
+    section {
+      position: relative;
+    }
+    .section-tag {
+      font-size: 0.62rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 1.5rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 5vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      color: var(--creme);
+    }
+    .section-title em { font-style: italic; color: var(--or); }
+    .section-body {
+      font-size: 0.9rem;
+      font-weight: 300;
+      line-height: 1.9;
+      color: rgba(245,240,232,0.6);
+      max-width: 480px;
+    }
+
+    /* Reveal animation base */
+    .reveal {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.35s; }
+    .reveal-d4 { transition-delay: 0.5s; }
+
+    /* ============================================================
+       ABOUT SECTION
+    ============================================================ */
+    #about {
+      padding: 14rem 8vw;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8vw;
+      align-items: center;
+      background: var(--noir);
+    }
+    .about-media {
+      position: relative;
+      height: 65vh;
+      min-height: 400px;
+    }
+    .about-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.85) saturate(0.9);
+    }
+    .about-img-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1a1309 0%, #0d0c0a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    /* Geometric Moroccan motif as CSS art */
+    .moroccan-art {
+      width: 340px;
+      height: 340px;
+      position: relative;
+      opacity: 0.15;
+    }
+    .moroccan-art svg { width: 100%; height: 100%; }
+    .about-badge {
+      position: absolute;
+      bottom: -2rem;
+      right: -2rem;
+      width: 140px;
+      height: 140px;
+      background: var(--or);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .about-badge strong {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem;
+      font-weight: 300;
+      color: var(--noir);
+      line-height: 1;
+    }
+    .about-badge small {
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--noir);
+      opacity: 0.7;
+    }
+    .about-text { display: flex; flex-direction: column; gap: 2rem; }
+    .about-line {
+      width: 40px;
+      height: 1px;
+      background: var(--or);
+    }
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(201,169,110,0.15);
+    }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--or);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gris);
+      margin-top: 0.4rem;
+    }
+
+    /* ============================================================
+       EXPERIENCES SECTION
+    ============================================================ */
+    #experiences {
+      padding: 10rem 8vw;
+      background: var(--noir2);
+    }
+    .exp-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 6rem;
+    }
+    .exp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .exp-card {
+      position: relative;
+      height: 60vh;
+      min-height: 480px;
+      overflow: hidden;
+      cursor: none;
+    }
+    .exp-card-bg {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.8s var(--ease-out-expo), filter 0.6s;
+      filter: brightness(0.5) saturate(0.7);
+    }
+    .exp-card:hover .exp-card-bg {
+      transform: scale(1.08);
+      filter: brightness(0.7) saturate(0.9);
+    }
+    /* Gradient backgrounds as placeholders for images */
+    .exp-bg-1 { background: linear-gradient(135deg, #1a110a 0%, #0f0b05 40%, #241808 100%); }
+    .exp-bg-2 { background: linear-gradient(135deg, #0a0f1a 0%, #050b0f 40%, #081524 100%); }
+    .exp-bg-3 { background: linear-gradient(135deg, #0f1a0a 0%, #0b0f05 40%, #142408 100%); }
+    /* Patterns overlay */
+    .exp-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.08;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a96e' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .exp-card-content {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 3rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+      transform: translateY(1rem);
+      transition: transform 0.5s var(--ease-out-expo);
+    }
+    .exp-card:hover .exp-card-content { transform: translateY(0); }
+    .exp-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.7rem;
+      color: var(--or);
+      letter-spacing: 0.3em;
+      margin-bottom: 0.8rem;
+    }
+    .exp-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem;
+      font-weight: 300;
+      color: var(--creme);
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+    .exp-desc {
+      font-size: 0.78rem;
+      color: rgba(245,240,232,0.55);
+      line-height: 1.7;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s var(--ease-out-expo);
+    }
+    .exp-card:hover .exp-desc { max-height: 100px; }
+    .exp-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      opacity: 0.15;
+      transition: opacity 0.4s, transform 0.4s var(--ease-out-expo);
+      pointer-events: none;
+    }
+    .exp-card:hover .exp-icon { opacity: 0.06; transform: translate(-50%, -60%) scale(1.2); }
+
+    /* ============================================================
+       ROOMS SECTION
+    ============================================================ */
+    #rooms {
+      padding: 12rem 8vw;
+      background: var(--noir);
+    }
+    .rooms-header { text-align: center; margin-bottom: 7rem; }
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem;
+    }
+    .room-card {
+      position: relative;
+      overflow: hidden;
+      cursor: none;
+      border: 1px solid rgba(201,169,110,0.08);
+      transition: border-color 0.4s;
+    }
+    .room-card:hover { border-color: rgba(201,169,110,0.25); }
+    .room-img {
+      height: 380px;
+      overflow: hidden;
+      position: relative;
+    }
+    .room-img-bg {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.8s var(--ease-out-expo);
+    }
+    .room-card:hover .room-img-bg { transform: scale(1.06); }
+    .room-bg-1 { background: linear-gradient(135deg, #1f150a 0%, #2a1c0e 50%, #1a1108 100%); }
+    .room-bg-2 { background: linear-gradient(135deg, #0a101f 0%, #0e162a 50%, #08101a 100%); }
+    .room-bg-3 { background: linear-gradient(135deg, #141f0a 0%, #1c2a0e 50%, #101a08 100%); }
+    .room-bg-4 { background: linear-gradient(135deg, #1f0a15 0%, #2a0e1c 50%, #1a0811 100%); }
+    .room-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 30%, rgba(10,10,8,0.8) 100%);
+    }
+    .room-tag {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: var(--or);
+      color: var(--noir);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      font-weight: 500;
+    }
+    /* Room interior illustration */
+    .room-interior {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.3;
+    }
+    .room-details {
+      padding: 2rem 2.2rem 2.5rem;
+      background: var(--noir2);
+    }
+    .room-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--creme);
+      margin-bottom: 0.5rem;
+    }
+    .room-type {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 1.2rem;
+    }
+    .room-amenities {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.8rem;
+    }
+    .amenity {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      color: var(--gris);
+      letter-spacing: 0.05em;
+    }
+    .amenity svg { width: 14px; height: 14px; opacity: 0.6; }
+    .room-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(201,169,110,0.1);
+    }
+    .room-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: var(--or);
+    }
+    .room-price small {
+      font-family: 'Jost', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      color: var(--gris);
+      font-weight: 300;
+    }
+    .room-btn {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--or);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(201,169,110,0.3);
+      padding-bottom: 2px;
+      transition: border-color 0.3s;
+    }
+    .room-btn:hover { border-color: var(--or); }
+
+    /* ============================================================
+       GALLERY SECTION
+    ============================================================ */
+    #gallery {
+      padding: 12rem 0;
+      background: var(--noir2);
+      overflow: hidden;
+    }
+    .gallery-header {
+      padding: 0 8vw;
+      margin-bottom: 5rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .gallery-track-wrap {
+      overflow: hidden;
+      position: relative;
+    }
+    .gallery-track {
+      display: flex;
+      gap: 2rem;
+      padding: 0 8vw;
+      will-change: transform;
+    }
+    .gallery-item {
+      flex-shrink: 0;
+      width: 420px;
+      height: 560px;
+      overflow: hidden;
+      position: relative;
+      cursor: none;
+    }
+    .gallery-item:nth-child(even) { margin-top: 4rem; }
+    .gallery-item-bg {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.9s var(--ease-out-expo);
+    }
+    .gallery-item:hover .gallery-item-bg { transform: scale(1.07); }
+    /* Gallery placeholder colors */
+    .g-bg-1 { background: linear-gradient(135deg, #241808 0%, #1a1108 60%, #0d0b06 100%); }
+    .g-bg-2 { background: linear-gradient(135deg, #081824 0%, #051018 60%, #020a10 100%); }
+    .g-bg-3 { background: linear-gradient(135deg, #180824 0%, #100518 60%, #080210 100%); }
+    .g-bg-4 { background: linear-gradient(135deg, #082418 0%, #051810 60%, #020d08 100%); }
+    .g-bg-5 { background: linear-gradient(135deg, #241808 0%, #1a1108 60%, #0d0b06 100%); }
+    .g-bg-6 { background: linear-gradient(135deg, #240818 0%, #1a0810 60%, #0d0608 100%); }
+    .gallery-item-label {
+      position: absolute;
+      bottom: 1.8rem;
+      left: 1.8rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: rgba(245,240,232,0.5);
+      pointer-events: none;
+    }
+    /* Moroccan geometric pattern overlays */
+    .g-pattern {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.12;
+      font-size: 8rem;
+    }
+
+    /* ============================================================
+       TESTIMONIALS SECTION
+    ============================================================ */
+    #testimonials {
+      padding: 14rem 8vw;
+      background: var(--noir);
+      position: relative;
+      overflow: hidden;
+    }
+    .testi-bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(6rem, 15vw, 16rem);
+      font-weight: 300;
+      color: rgba(201,169,110,0.04);
+      white-space: nowrap;
+      pointer-events: none;
+      letter-spacing: -0.02em;
+    }
+    .testi-header { text-align: center; margin-bottom: 7rem; position: relative; }
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3rem;
+    }
+    .testi-card {
+      padding: 3rem;
+      border: 1px solid rgba(201,169,110,0.12);
+      position: relative;
+      background: linear-gradient(135deg, rgba(201,169,110,0.03) 0%, transparent 100%);
+      transition: border-color 0.4s, transform 0.4s var(--ease-out-expo);
+    }
+    .testi-card:hover {
+      border-color: rgba(201,169,110,0.3);
+      transform: translateY(-6px);
+    }
+    .testi-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 5rem;
+      color: var(--or);
+      line-height: 0.5;
+      margin-bottom: 1.5rem;
+      opacity: 0.5;
+    }
+    .testi-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--creme);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .testi-stars {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 1.5rem;
+    }
+    .star { color: var(--or); font-size: 0.75rem; }
+    .testi-author {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .testi-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--or);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: var(--noir);
+      font-weight: 400;
+    }
+    .testi-name {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--creme);
+      letter-spacing: 0.05em;
+    }
+    .testi-origin {
+      font-size: 0.65rem;
+      color: var(--gris);
+      letter-spacing: 0.1em;
+    }
+
+    /* ============================================================
+       BOOKING SECTION
+    ============================================================ */
+    #booking {
+      padding: 14rem 8vw;
+      background: var(--creme);
+      position: relative;
+      overflow: hidden;
+    }
+    #booking::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a96e' fill-opacity='0.06'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .booking-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .booking-inner .section-tag { color: #a07840; }
+    .booking-inner .section-title { color: var(--noir); }
+    .booking-inner .section-title em { color: #a07840; }
+    .booking-inner .section-body { color: rgba(10,10,8,0.55); margin: 2rem auto 4rem; text-align: center; }
+    .booking-form {
+      background: var(--noir);
+      padding: 3.5rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 0;
+      border: 1px solid rgba(201,169,110,0.15);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 2rem;
+      border-right: 1px solid rgba(201,169,110,0.12);
+    }
+    .form-group:last-of-type { border-right: none; }
+    .form-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 0.5rem;
+    }
+    .form-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--creme);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      font-weight: 300;
+      cursor: none;
+    }
+    .form-input::placeholder { color: rgba(245,240,232,0.25); }
+    .form-btn {
+      background: var(--or);
+      color: var(--noir);
+      border: none;
+      padding: 0 2.5rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: none;
+      transition: background 0.3s;
+      white-space: nowrap;
+    }
+    .form-btn:hover { background: var(--or-pale); }
+    .booking-features {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      margin-top: 3rem;
+    }
+    .b-feature {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.72rem;
+      color: rgba(10,10,8,0.5);
+      letter-spacing: 0.05em;
+    }
+    .b-feature-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #a07840;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: #060605;
+      padding: 7rem 8vw 3rem;
+      border-top: 1px solid rgba(201,169,110,0.1);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 5vw;
+      margin-bottom: 6rem;
+    }
+    .footer-brand .nav-logo {
+      display: block;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .footer-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1rem;
+      color: rgba(245,240,232,0.4);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .footer-socials {
+      display: flex;
+      gap: 1.2rem;
+    }
+    .social-link {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(201,169,110,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(201,169,110,0.5);
+      text-decoration: none;
+      font-size: 0.75rem;
+      transition: all 0.3s;
+    }
+    .social-link:hover {
+      border-color: var(--or);
+      color: var(--or);
+      background: rgba(201,169,110,0.05);
+    }
+    .footer-col h4 {
+      font-size: 0.62rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 1.8rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.9rem; }
+    .footer-col a {
+      font-size: 0.78rem;
+      color: rgba(245,240,232,0.45);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-col a:hover { color: var(--creme); }
+    .footer-bottom {
+      padding-top: 3rem;
+      border-top: 1px solid rgba(201,169,110,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-copy {
+      font-size: 0.65rem;
+      color: rgba(245,240,232,0.25);
+      letter-spacing: 0.1em;
+    }
+    .footer-awards {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    .award-badge {
+      font-size: 0.6rem;
+      color: rgba(201,169,110,0.4);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: 1px solid rgba(201,169,110,0.15);
+      padding: 0.4rem 0.9rem;
+    }
+
+    /* ============================================================
+       HORIZONTAL MARQUEE
+    ============================================================ */
+    .marquee-section {
+      padding: 2rem 0;
+      overflow: hidden;
+      background: var(--or);
+    }
+    .marquee-track {
+      display: flex;
+      gap: 0;
+      animation: marqueeMove 20s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 0 2.5rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--noir);
+      font-weight: 500;
+    }
+    .marquee-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(10,10,8,0.4); }
+    @keyframes marqueeMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ============================================================
+       CANVAS SECTION (parallax 3D mid)
+    ============================================================ */
+    #canvas-mid {
+      height: 100px;
+      background: transparent;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 1024px) {
+      #about { grid-template-columns: 1fr; gap: 4rem; }
+      .exp-grid { grid-template-columns: 1fr 1fr; }
+      .exp-card:nth-child(3) { grid-column: 1 / -1; height: 40vh; }
+      .rooms-grid { grid-template-columns: 1fr; }
+      .testi-grid { grid-template-columns: 1fr 1fr; }
+      .booking-form { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 3rem; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 768px) {
+      .exp-grid, .testi-grid { grid-template-columns: 1fr; }
+      .about-badge { bottom: -1.5rem; right: 0; }
+      .booking-form { padding: 2rem; }
+      .booking-features { flex-direction: column; gap: 1rem; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-awards { display: none; }
+    }
+  </style>
 
 </head>
 <body>
 
-<div class="hero">
-  <h1>MA MARQUE</h1>
-  <p>Expérience digitale premium</p>
+  <!-- ============================================================
+       CURSOR
+  ============================================================ -->
+
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- ============================================================
+       LOADER
+  ============================================================ -->
+
+  <div id="loader">
+    <div id="loader-logo">Soleil d'Or</div>
+    <div id="loader-bar-wrap"><div id="loader-bar"></div></div>
+    <div id="loader-pct">000</div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+  ============================================================ -->
+
+  <nav id="nav">
+    <a href="#" class="nav-logo">Riad <span>Soleil d'Or</span></a>
+    <ul class="nav-links">
+      <li><a href="#about">Maison</a></li>
+      <li><a href="#experiences">Expériences</a></li>
+      <li><a href="#rooms">Suites</a></li>
+      <li><a href="#gallery">Galerie</a></li>
+      <li><a href="#testimonials">Témoignages</a></li>
+    </ul>
+    <a href="#booking" class="nav-cta">Réserver</a>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+
+  <section id="hero">
+    <canvas id="canvas-hero"></canvas>
+    <div class="hero-content">
+      <p class="hero-eyebrow reveal" id="hero-eyebrow">Marrakech · Médina · Depuis 1987</p>
+      <h1 class="hero-title" id="hero-title">
+        L'art de<br/><em>vivre</em><br/>marocain
+      </h1>
+      <p class="hero-subtitle" id="hero-sub">Une expérience de luxe au cœur de la médina historique</p>
+      <div class="hero-actions" id="hero-actions">
+        <a href="#experiences" class="btn-primary">Découvrir</a>
+        <a href="#rooms" class="btn-ghost">Nos Suites</a>
+      </div>
+    </div>
+    <div class="hero-scroll-hint" id="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+
+  <div class="marquee-section">
+    <div class="marquee-track" id="marquee">
+      <span class="marquee-item">Luxury Riad<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Marrakech Médina<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Expériences Uniques<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Spa Hammam<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Cuisine Gastronomique<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Suites Privées<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Luxury Riad<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Marrakech Médina<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Expériences Uniques<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Spa Hammam<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Cuisine Gastronomique<span class="marquee-dot"></span></span>
+      <span class="marquee-item">Suites Privées<span class="marquee-dot"></span></span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ABOUT
+  ============================================================ -->
+
+  <section id="about">
+    <div class="about-media reveal">
+      <div class="about-img-bg">
+        <!-- Moroccan geometric SVG art -->
+        <div class="moroccan-art">
+          <svg viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Zellige pattern -->
+            <defs>
+              <pattern id="zellige" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <polygon points="20,0 40,10 40,30 20,40 0,30 0,10" fill="none" stroke="#c9a96e" stroke-width="0.5"/>
+                <polygon points="20,8 32,14 32,26 20,32 8,26 8,14" fill="none" stroke="#c9a96e" stroke-width="0.5"/>
+                <polygon points="20,16 26,19 26,21 20,24 14,21 14,19" fill="#c9a96e"/>
+              </pattern>
+            </defs>
+            <rect width="340" height="340" fill="url(#zellige)"/>
+            <circle cx="170" cy="170" r="130" fill="none" stroke="#c9a96e" stroke-width="1"/>
+            <circle cx="170" cy="170" r="100" fill="none" stroke="#c9a96e" stroke-width="0.5" stroke-dasharray="4 4"/>
+            <!-- 8-pointed star -->
+            <path d="M170 60 L185 130 L230 100 L200 145 L250 170 L200 195 L230 240 L185 210 L170 280 L155 210 L110 240 L140 195 L90 170 L140 145 L110 100 L155 130 Z" fill="none" stroke="#c9a96e" stroke-width="1" opacity="0.6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="about-badge">
+        <strong>37</strong>
+        <small>ans d'excellence</small>
+      </div>
+    </div>
+    <div class="about-text">
+      <div class="about-line reveal"></div>
+      <p class="section-tag reveal reveal-d1">Notre Histoire</p>
+      <h2 class="section-title reveal reveal-d2">Un joyau caché<br/>au cœur de la <em>médina</em></h2>
+      <p class="section-body reveal reveal-d3">
+        Fondé en 1987 dans un palais du XVIIᵉ siècle entièrement restauré, le Riad Soleil d'Or est une ode à l'art de vivre marocain. Chaque détail — des zeliges aux moucharabiehs — a été façonné par les maîtres artisans de Fès et Marrakech.
+      </p>
+      <p class="section-body reveal reveal-d3">
+        Ici, le temps s'écoule différemment. Entre le murmure de la fontaine centrale et les effluves de rose et de cumin, vous retrouvez l'essentiel.
+      </p>
+      <div class="about-stats reveal reveal-d4">
+        <div>
+          <div class="stat-num">12</div>
+          <div class="stat-label">Suites Exclusives</div>
+        </div>
+        <div>
+          <div class="stat-num">98%</div>
+          <div class="stat-label">Satisfaction Client</div>
+        </div>
+        <div>
+          <div class="stat-num">5★</div>
+          <div class="stat-label">Classement Luxe</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       EXPERIENCES
+  ============================================================ -->
+
+  <section id="experiences">
+    <div class="exp-header">
+      <div>
+        <p class="section-tag reveal">Nos Offres</p>
+        <h2 class="section-title reveal reveal-d1">Expériences<br/><em>inoubliables</em></h2>
+      </div>
+      <a href="#" class="btn-ghost reveal reveal-d2" style="margin-bottom:0.5rem">Voir tout</a>
+    </div>
+    <div class="exp-grid">
+      <div class="exp-card reveal">
+        <div class="exp-card-bg exp-bg-1"></div>
+        <div class="exp-pattern"></div>
+        <div class="exp-icon">🌹</div>
+        <div class="exp-card-content">
+          <div class="exp-num">01 / 05</div>
+          <div class="exp-title">Hammam & Spa Rituel</div>
+          <div class="exp-desc">Un voyage sensoriel complet avec gommage au savon beldi, enveloppement à l'argile du Ghassoul et massage aux huiles d'argan.</div>
+        </div>
+      </div>
+      <div class="exp-card reveal reveal-d1">
+        <div class="exp-card-bg exp-bg-2"></div>
+        <div class="exp-pattern"></div>
+        <div class="exp-icon">🏯</div>
+        <div class="exp-card-content">
+          <div class="exp-num">02 / 05</div>
+          <div class="exp-title">Médina Privée Tour</div>
+          <div class="exp-desc">Explorez les ruelles secrètes avec un guide personnel, accédez aux ateliers d'artisans et aux souks hors des sentiers battus.</div>
+        </div>
+      </div>
+      <div class="exp-card reveal reveal-d2">
+        <div class="exp-card-bg exp-bg-3"></div>
+        <div class="exp-pattern"></div>
+        <div class="exp-icon">🫒</div>
+        <div class="exp-card-content">
+          <div class="exp-num">03 / 05</div>
+          <div class="exp-title">Cours de Cuisine Berbère</div>
+          <div class="exp-desc">Notre chef vous initie aux secrets du tajine, du couscous et des pâtisseries marocaines dans une cuisine traditionnelle.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ROOMS
+  ============================================================ -->
+
+  <section id="rooms">
+    <div class="rooms-header">
+      <p class="section-tag reveal">Hébergements</p>
+      <h2 class="section-title reveal reveal-d1">Nos <em>Suites</em></h2>
+      <p class="section-body reveal reveal-d2" style="margin: 1.5rem auto 0; text-align:center">
+        Douze suites uniques, chacune une déclaration d'amour à l'art décoratif marocain.
+      </p>
+    </div>
+    <div class="rooms-grid">
+
+```
+  <div class="room-card reveal">
+    <div class="room-img">
+      <div class="room-img-bg room-bg-1">
+        <div class="room-overlay"></div>
+        <div class="room-interior">
+          <svg width="200" height="180" viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="80" width="180" height="90" rx="2" fill="none" stroke="#c9a96e" stroke-width="0.8" opacity="0.4"/>
+            <rect x="30" y="50" width="60" height="100" rx="2" fill="none" stroke="#c9a96e" stroke-width="0.8" opacity="0.4"/>
+            <rect x="110" y="50" width="60" height="100" rx="2" fill="none" stroke="#c9a96e" stroke-width="0.8" opacity="0.4"/>
+            <path d="M40 80 Q100 50 160 80" stroke="#c9a96e" stroke-width="0.6" fill="none" opacity="0.3"/>
+            <circle cx="100" cy="30" r="15" fill="none" stroke="#c9a96e" stroke-width="0.6" opacity="0.3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="room-tag">Suite Signature</div>
+    </div>
+    <div class="room-details">
+      <div class="room-name">Suite Almeria</div>
+      <div class="room-type">Suite Junior · 45 m²</div>
+      <div class="room-amenities">
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M7 8V6a5 5 0 0110 0v2"/></svg>
+          Jacuzzi Privé
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Terrasse Privée
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v1m0 16v1M3 12h1m16 0h1M5.6 5.6l.7.7m11.4-.7l-.7.7M5.6 18.4l.7-.7m11.4.7l-.7-.7M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+          Vue Médina
+        </div>
+      </div>
+      <div class="room-footer">
+        <div class="room-price">480€ <small>/ nuit</small></div>
+        <a href="#booking" class="room-btn">Réserver →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="room-card reveal reveal-d1">
+    <div class="room-img">
+      <div class="room-img-bg room-bg-2">
+        <div class="room-overlay"></div>
+        <div class="room-interior">
+          <svg width="200" height="180" viewBox="0 0 200 180" fill="none">
+            <path d="M20 140 L20 60 Q100 20 180 60 L180 140 Z" fill="none" stroke="#c9a96e" stroke-width="0.8" opacity="0.3"/>
+            <rect x="60" y="90" width="80" height="50" fill="none" stroke="#c9a96e" stroke-width="0.8" opacity="0.4"/>
+            <circle cx="100" cy="60" r="20" fill="none" stroke="#c9a96e" stroke-width="0.6" opacity="0.3"/>
+            <line x1="60" y1="90" x2="100" y2="60" stroke="#c9a96e" stroke-width="0.4" opacity="0.3"/>
+            <line x1="140" y1="90" x2="100" y2="60" stroke="#c9a96e" stroke-width="0.4" opacity="0.3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="room-tag">Suite Prestige</div>
+    </div>
+    <div class="room-details">
+      <div class="room-name">Suite Royale Andalucia</div>
+      <div class="room-type">Suite Prestige · 75 m²</div>
+      <div class="room-amenities">
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
+          Salon Privatif
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l4 4"/></svg>
+          Service 24h
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Butler Dédié
+        </div>
+      </div>
+      <div class="room-footer">
+        <div class="room-price">890€ <small>/ nuit</small></div>
+        <a href="#booking" class="room-btn">Réserver →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="room-card reveal reveal-d2">
+    <div class="room-img">
+      <div class="room-img-bg room-bg-3">
+        <div class="room-overlay"></div>
+      </div>
+      <div class="room-tag">Patio Exclusif</div>
+    </div>
+    <div class="room-details">
+      <div class="room-name">Maison Sultane</div>
+      <div class="room-type">Maison Privée · 180 m²</div>
+      <div class="room-amenities">
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Riad Entier
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          Piscine Privée
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          Chef Privatif
+        </div>
+      </div>
+      <div class="room-footer">
+        <div class="room-price">2 400€ <small>/ nuit</small></div>
+        <a href="#booking" class="room-btn">Réserver →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="room-card reveal reveal-d3">
+    <div class="room-img">
+      <div class="room-img-bg room-bg-4">
+        <div class="room-overlay"></div>
+      </div>
+      <div class="room-tag">Vue Panoramique</div>
+    </div>
+    <div class="room-details">
+      <div class="room-name">Suite Terrasse Atlas</div>
+      <div class="room-type">Suite Supérieure · 60 m²</div>
+      <div class="room-amenities">
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Rooftop Privé
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Vue Atlas
+        </div>
+        <div class="amenity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          Nid d'Amour
+        </div>
+      </div>
+      <div class="room-footer">
+        <div class="room-price">650€ <small>/ nuit</small></div>
+        <a href="#booking" class="room-btn">Réserver →</a>
+      </div>
+    </div>
+  </div>
+
 </div>
+```
 
-<section></section>
-<section></section>
+  </section>
 
-<canvas id="canvas"></canvas>
+  <!-- ============================================================
+       GALLERY
+  ============================================================ -->
 
-<!-- Three.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <section id="gallery">
+    <div class="gallery-header">
+      <div>
+        <p class="section-tag reveal">Atmosphère</p>
+        <h2 class="section-title reveal reveal-d1">La <em>beauté</em><br/>en images</h2>
+      </div>
+      <a href="#" class="btn-ghost reveal reveal-d2" style="margin-bottom:0.5rem">Voir la galerie complète</a>
+    </div>
+    <div class="gallery-track-wrap">
+      <div class="gallery-track" id="gallery-track">
+        <div class="gallery-item">
+          <div class="gallery-item-bg g-bg-1">
+            <div class="g-pattern">✦</div>
+          </div>
+          <div class="gallery-item-label">Patio central</div>
+        </div>
+        <div class="gallery-item">
+          <div class="gallery-item-bg g-bg-2">
+            <div class="g-pattern">◈</div>
+          </div>
+          <div class="gallery-item-label">Suite Royale</div>
+        </div>
+        <div class="gallery-item">
+          <div class="gallery-item-bg g-bg-3">
+            <div class="g-pattern">❋</div>
+          </div>
+          <div class="gallery-item-label">Hammam ancestral</div>
+        </div>
+        <div class="gallery-item">
+          <div class="gallery-item-bg g-bg-4">
+            <div class="g-pattern">✧</div>
+          </div>
+          <div class="gallery-item-label">Rooftop coucher de soleil</div>
+        </div>
+        <div class="gallery-item">
+          <div class="gallery-item-bg g-bg-5">
+            <div class="g-pattern">⬡</div>
+          </div>
+          <div class="gallery-item-label">Dîner aux étoiles</div>
+        </div>
+        <div class="gallery-item">
+          <div class="gallery-item-bg g-bg-6">
+            <div class="g-pattern">✦</div>
+          </div>
+          <div class="gallery-item-label">Jardins secrets</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- Loader GLB -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- ============================================================
+       TESTIMONIALS
+  ============================================================ -->
 
-<!-- GSAP -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <section id="testimonials">
+    <div class="testi-bg-text">Témoignages</div>
+    <div class="testi-header">
+      <p class="section-tag reveal">Avis Clients</p>
+      <h2 class="section-title reveal reveal-d1">Ce qu'ils ont <em>ressenti</em></h2>
+    </div>
+    <div class="testi-grid">
 
-<script>
-const scene = new THREE.Scene();
+```
+  <div class="testi-card reveal">
+    <div class="testi-quote">"</div>
+    <p class="testi-text">Une maison hors du temps. Chaque matin, l'odeur des fleurs d'oranger et le murmure de la fontaine. Le personnel anticipe chaque désir. Un rêve éveillé.</p>
+    <div class="testi-stars">
+      <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+    </div>
+    <div class="testi-author">
+      <div class="testi-avatar">S</div>
+      <div>
+        <div class="testi-name">Sophie M.</div>
+        <div class="testi-origin">Paris, France · Mai 2025</div>
+      </div>
+    </div>
+  </div>
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+  <div class="testi-card reveal reveal-d1">
+    <div class="testi-quote">"</div>
+    <p class="testi-text">Le plus beau riad que j'aie jamais visité dans toute la médina. L'architecture est époustouflante, le spa absolument extraordinaire. Je reviendrai sans hésiter.</p>
+    <div class="testi-stars">
+      <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+    </div>
+    <div class="testi-author">
+      <div class="testi-avatar">J</div>
+      <div>
+        <div class="testi-name">James W.</div>
+        <div class="testi-origin">London, UK · Février 2025</div>
+      </div>
+    </div>
+  </div>
 
-const renderer = new THREE.WebGLRenderer({
-  canvas: document.getElementById("canvas"),
-  alpha: true,
-  antialias: true
-});
+  <div class="testi-card reveal reveal-d2">
+    <div class="testi-quote">"</div>
+    <p class="testi-text">Notre lune de miel de rêve. La suite Royale Andalucia était magique — le jacuzzi sur la terrasse face aux étoiles, inégalable. Un luxe authentique et chaleureux.</p>
+    <div class="testi-stars">
+      <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+    </div>
+    <div class="testi-author">
+      <div class="testi-avatar">A</div>
+      <div>
+        <div class="testi-name">Amira & Khalid B.</div>
+        <div class="testi-origin">Dubai, UAE · Janvier 2025</div>
+      </div>
+    </div>
+  </div>
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-camera.position.z = 3;
+</div>
+```
 
-// lumière
-const light = new THREE.PointLight(0xffffff, 2);
-light.position.set(5, 5, 5);
-scene.add(light);
+  </section>
 
-// loader modèle 3D
-const loader = new THREE.GLTFLoader();
+  <!-- ============================================================
+       BOOKING
+  ============================================================ -->
 
-let model;
+  <section id="booking">
+    <div class="booking-inner">
+      <p class="section-tag reveal">Réservation</p>
+      <h2 class="section-title reveal reveal-d1">Commencez votre<br/><em>voyage</em></h2>
+      <p class="section-body reveal reveal-d2">Reservez directement et bénéficiez des meilleurs tarifs garantis, du petit-déjeuner offert et d'un accueil personnalisé.</p>
+      <div class="booking-form reveal reveal-d3">
+        <div class="form-group">
+          <label class="form-label">Arrivée</label>
+          <input type="text" class="form-input" placeholder="JJ / MM / AAAA" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Départ</label>
+          <input type="text" class="form-input" placeholder="JJ / MM / AAAA" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Voyageurs</label>
+          <input type="text" class="form-input" placeholder="2 adultes" />
+        </div>
+        <button class="form-btn">Vérifier<br/>les disponibilités</button>
+      </div>
+      <div class="booking-features reveal reveal-d4">
+        <div class="b-feature"><div class="b-feature-dot"></div>Meilleur tarif garanti</div>
+        <div class="b-feature"><div class="b-feature-dot"></div>Annulation flexible</div>
+        <div class="b-feature"><div class="b-feature-dot"></div>Petit-déjeuner offert</div>
+        <div class="b-feature"><div class="b-feature-dot"></div>Transfert aéroport inclus</div>
+      </div>
+    </div>
+  </section>
 
-loader.load(
-  "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
-  function (gltf) {
-    model = gltf.scene;
-    model.scale.set(2, 2, 2);
-    scene.add(model);
-  }
-);
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
 
-// animation
-function animate() {
-  requestAnimationFrame(animate);
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">Riad <span>Soleil d'Or</span></a>
+        <p class="footer-tagline">"Où l'art de vivre<br/>marocain rencontre<br/>le raffinement absolu."</p>
+        <div class="footer-socials">
+          <a href="#" class="social-link">in</a>
+          <a href="#" class="social-link">ig</a>
+          <a href="#" class="social-link">fb</a>
+          <a href="#" class="social-link">tw</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Le Riad</h4>
+        <ul>
+          <li><a href="#about">Notre Histoire</a></li>
+          <li><a href="#rooms">Nos Suites</a></li>
+          <li><a href="#experiences">Expériences</a></li>
+          <li><a href="#gallery">Galerie</a></li>
+          <li><a href="#">Événements Privés</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#">Spa & Hammam</a></li>
+          <li><a href="#">Restaurant Gastronomique</a></li>
+          <li><a href="#">Excursions Privées</a></li>
+          <li><a href="#">Mariages & Cérémonies</a></li>
+          <li><a href="#">Conciergerie</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:contact@riadsoleil.com">contact@riadsoleil.com</a></li>
+          <li><a href="tel:+212524000000">+212 524 00 00 00</a></li>
+          <li><a href="#">12 Derb Laksour, Médina<br/>Marrakech 40000, Maroc</a></li>
+          <li><a href="#">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2025 Riad Soleil d'Or · Tous droits réservés · Conception premium</p>
+      <div class="footer-awards">
+        <span class="award-badge">Condé Nast 2024</span>
+        <span class="award-badge">Relais & Châteaux</span>
+        <span class="award-badge">Traveller's Choice</span>
+      </div>
+    </div>
+  </footer>
 
-  if (model) {
-    model.rotation.y += 0.005;
-  }
+  <!-- ============================================================
+       SCRIPTS
+  ============================================================ -->
 
-  renderer.render(scene, camera);
-}
-animate();
+  <!-- Three.js -->
 
-// scroll animation
-window.addEventListener("scroll", () => {
-  if (!model) return;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  const scrollY = window.scrollY;
+  <!-- GSAP -->
 
-  gsap.to(model.rotation, {
-    x: scrollY * 0.002,
-    y: scrollY * 0.002
-  });
-});
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-// resize
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <script>
+    /* ============================================================
+       GSAP REGISTER
+    ============================================================ */
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ============================================================
+       LOADER
+    ============================================================ */
+    (function() {
+      const bar = document.getElementById('loader-bar');
+      const pct = document.getElementById('loader-pct');
+      const loader = document.getElementById('loader');
+      let count = 0;
+      const interval = setInterval(() => {
+        count += Math.random() * 8 + 2;
+        if (count >= 100) count = 100;
+        bar.style.width = count + '%';
+        pct.textContent = String(Math.floor(count)).padStart(3, '0');
+        if (count === 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            gsap.to(loader, {
+              opacity: 0, duration: 0.8, ease: 'power2.inOut',
+              onComplete: () => {
+                loader.style.display = 'none';
+                initHeroAnimations();
+              }
+            });
+          }, 400);
+        }
+      }, 40);
+    })();
+
+    /* ============================================================
+       CUSTOM CURSOR
+    ============================================================ */
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+    });
+
+    function animateCursor() {
+      rx += (mx - rx) * 0.1;
+      ry += (my - ry) * 0.1;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    document.querySelectorAll('a, button, .exp-card, .room-card, .gallery-item').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+
+    /* ============================================================
+       NAV SCROLL
+    ============================================================ */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 80);
+    });
+
+    /* ============================================================
+       THREE.JS HERO PARTICLE SPHERE
+    ============================================================ */
+    const canvas = document.getElementById('canvas-hero');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 5;
+
+    // Particle system — golden sphere constellation
+    const PARTICLE_COUNT = 4000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(PARTICLE_COUNT * 3);
+    const colors    = new Float32Array(PARTICLE_COUNT * 3);
+    const sizes     = new Float32Array(PARTICLE_COUNT);
+
+    // Distribute on sphere + random cloud
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const isSphere = i < PARTICLE_COUNT * 0.6;
+      if (isSphere) {
+        // Fibonacci sphere
+        const phi = Math.acos(1 - 2 * (i / (PARTICLE_COUNT * 0.6)));
+        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+        const r = 2.2 + (Math.random() - 0.5) * 0.4;
+        positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+        positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i*3+2] = r * Math.cos(phi);
+      } else {
+        // Ambient cloud
+        const r = 4 + Math.random() * 4;
+        const theta = Math.random() * Math.PI * 2;
+        const phi   = Math.random() * Math.PI;
+        positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+        positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i*3+2] = r * Math.cos(phi);
+      }
+      // Color: gold to pale cream
+      const t = Math.random();
+      colors[i*3]   = 0.78 + t * 0.22;  // R
+      colors[i*3+1] = 0.66 + t * 0.28;  // G
+      colors[i*3+2] = 0.43 + t * 0.37;  // B
+      sizes[i] = isSphere ? (Math.random() * 2 + 1) : (Math.random() * 1.5 + 0.3);
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime:    { value: 0 },
+        uScroll:  { value: 0 },
+        uMouse:   { value: new THREE.Vector2(0, 0) }
+      },
+      vertexShader: `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        varying float vAlpha;
+        uniform float uTime;
+        uniform float uScroll;
+        uniform vec2 uMouse;
+
+        void main() {
+          vColor = color;
+          vec3 pos = position;
+
+          // Gentle rotation
+          float angle = uTime * 0.12;
+          float cosA = cos(angle), sinA = sin(angle);
+          vec3 rotated;
+          rotated.x = pos.x * cosA - pos.z * sinA;
+          rotated.y = pos.y;
+          rotated.z = pos.x * sinA + pos.z * cosA;
+
+          // Mouse attraction
+          float dist = length(rotated.xz);
+          float mouseInfluence = 0.15;
+          rotated.x += uMouse.x * mouseInfluence * (1.0 / (dist + 1.0));
+          rotated.y += uMouse.y * mouseInfluence * (1.0 / (dist + 1.0));
+
+          // Scroll disintegration
+          float scrollDisplace = uScroll * 4.0;
+          float seed = fract(sin(dot(pos, vec3(12.9898, 78.233, 45.543))) * 43758.5453);
+          rotated += vec3(
+            seed * scrollDisplace * (cos(seed * 6.28) * 2.0 - 1.0),
+            seed * scrollDisplace * (sin(seed * 9.42) * 2.0 - 1.0),
+            seed * scrollDisplace * 0.5
+          );
+
+          vAlpha = 1.0 - uScroll * 1.5;
+          vec4 mvPosition = modelViewMatrix * vec4(rotated, 1.0);
+          gl_PointSize = size * (300.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vec2 uv = gl_PointCoord - 0.5;
+          float d = length(uv);
+          if (d > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.1, d) * vAlpha;
+          gl_FragColor = vec4(vColor, alpha);
+        }
+      `,
+      transparent: true,
+      depthWrite: false,
+      vertexColors: true
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    // Mouse tracking
+    const mouse = { x: 0, y: 0 };
+    document.addEventListener('mousemove', e => {
+      mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouse.y = -(e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    // Scroll tracking for disintegration
+    let scrollProgress = 0;
+    window.addEventListener('scroll', () => {
+      const hero = document.getElementById('hero');
+      const heroH = hero.offsetHeight;
+      scrollProgress = Math.min(window.scrollY / heroH, 1);
+    });
+
+    // Render loop
+    const clock = new THREE.Clock();
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      material.uniforms.uTime.value = clock.getElapsedTime();
+      material.uniforms.uScroll.value += (scrollProgress - material.uniforms.uScroll.value) * 0.05;
+      material.uniforms.uMouse.value.x += (mouse.x - material.uniforms.uMouse.value.x) * 0.05;
+      material.uniforms.uMouse.value.y += (mouse.y - material.uniforms.uMouse.value.y) * 0.05;
+      renderer.render(scene, camera);
+    }
+    renderLoop();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    /* ============================================================
+       HERO ENTRANCE ANIMATIONS (called after loader)
+    ============================================================ */
+    function initHeroAnimations() {
+      const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+      tl.to('#hero-eyebrow', { opacity: 1, y: 0, duration: 1.2 }, 0.2)
+        .to('#hero-title',   { opacity: 1, y: 0, duration: 1.4 }, 0.5)
+        .to('#hero-sub',     { opacity: 1, y: 0, duration: 1.2 }, 0.8)
+        .to('#hero-actions', { opacity: 1, y: 0, duration: 1.0 }, 1.0)
+        .to('#scroll-hint',  { opacity: 1, duration: 1.0 }, 1.4);
+    }
+
+    /* ============================================================
+       SCROLL REVEAL (IntersectionObserver)
+    ============================================================ */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* ============================================================
+       GALLERY DRAG SCROLL
+    ============================================================ */
+    (function() {
+      const track = document.getElementById('gallery-track');
+      let isDown = false, startX, scrollLeft;
+      let autoX = 0, velocity = 0.5;
+
+      // Auto-scroll
+      function autoScroll() {
+        if (!isDown) {
+          autoX += velocity;
+          const maxScroll = track.scrollWidth / 2;
+          if (autoX >= maxScroll) autoX = 0;
+          track.style.transform = `translateX(-${autoX}px)`;
+        }
+        requestAnimationFrame(autoScroll);
+      }
+      autoScroll();
+
+      track.addEventListener('mousedown', e => {
+        isDown = true;
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = autoX;
+      });
+      track.addEventListener('mouseleave', () => isDown = false);
+      track.addEventListener('mouseup', () => isDown = false);
+      track.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        autoX = scrollLeft - walk;
+      });
+    })();
+
+    /* ============================================================
+       PARALLAX SCROLL EFFECTS (GSAP + ScrollTrigger)
+    ============================================================ */
+
+    // About section parallax
+    gsap.to('.about-media', {
+      y: -80,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#about',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1.5
+      }
+    });
+
+    // Rooms cards stagger
+    gsap.from('.room-card', {
+      y: 60,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.15,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#rooms',
+        start: 'top 75%'
+      }
+    });
+
+    // Testimonial cards stagger
+    gsap.from('.testi-card', {
+      y: 40,
+      opacity: 0,
+      duration: 0.9,
+      stagger: 0.1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#testimonials',
+        start: 'top 70%'
+      }
+    });
+
+    // Booking form slide up
+    gsap.from('.booking-form', {
+      y: 50,
+      opacity: 0,
+      duration: 1.1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#booking',
+        start: 'top 70%'
+      }
+    });
+
+    // Background parallax text
+    gsap.to('.testi-bg-text', {
+      x: -100,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#testimonials',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 2
+      }
+    });
+
+    // Section titles split reveal
+    document.querySelectorAll('.section-title').forEach(title => {
+      gsap.from(title, {
+        clipPath: 'inset(0 0 100% 0)',
+        opacity: 0,
+        y: 30,
+        duration: 1.2,
+        ease: 'power4.out',
+        scrollTrigger: {
+          trigger: title,
+          start: 'top 80%'
+        }
+      });
+    });
+
+    // Numbers counter animation
+    document.querySelectorAll('.stat-num').forEach(el => {
+      const text = el.textContent.trim();
+      const match = text.match(/\d+/);
+      if (!match) return;
+      const end = parseInt(match[0]);
+      const suffix = text.replace(end, '');
+      gsap.from({ val: 0 }, {
+        val: end,
+        duration: 2,
+        ease: 'power2.out',
+        onUpdate: function() {
+          el.textContent = Math.floor(this.targets()[0].val) + suffix;
+        },
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%'
+        }
+      });
+    });
+
+    // Exp card horizontal stagger
+    gsap.from('.exp-card', {
+      x: 60,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.15,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#experiences',
+        start: 'top 70%'
+      }
+    });
+
+    // Hero text parallax on scroll
+    gsap.to('.hero-content', {
+      y: 150,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1
+      }
+    });
+
+    // Gallery items subtle parallax
+    document.querySelectorAll('.gallery-item').forEach((item, i) => {
+      gsap.to(item, {
+        y: i % 2 === 0 ? -40 : 40,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#gallery',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.5
+        }
+      });
+    });
+
+    /* ============================================================
+       SMOOTH ANCHOR SCROLL
+    ============================================================ */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        gsap.to(window, {
+          scrollTo: { y: target, offsetY: 80 },
+          duration: 1.2,
+          ease: 'power3.inOut'
+        });
+      });
+    });
+
+    /* ============================================================
+       PAGE GLOW EFFECT — ambient orb follows mouse
+    ============================================================ */
+    const orb = document.createElement('div');
+    orb.style.cssText = `
+      position:fixed; pointer-events:none; z-index:0;
+      width:600px; height:600px; border-radius:50%;
+      background: radial-gradient(circle, rgba(201,169,110,0.04) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: left 0.8s ease, top 0.8s ease;
+    `;
+    document.body.appendChild(orb);
+    document.addEventListener('mousemove', e => {
+      orb.style.left = e.clientX + 'px';
+      orb.style.top  = e.clientY + 'px';
+    });
+
+    /* ============================================================
+       FOOTER LINKS HOVER STAGGER
+    ============================================================ */
+    document.querySelectorAll('.footer-col a').forEach(link => {
+      link.addEventListener('mouseenter', () => {
+        gsap.to(link, { x: 6, duration: 0.3, ease: 'power2.out' });
+      });
+      link.addEventListener('mouseleave', () => {
+        gsap.to(link, { x: 0, duration: 0.3, ease: 'power2.out' });
+      });
+    });
+
+  </script>
 
 </body>
 </html>
